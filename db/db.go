@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	// initiate the drivers for postgresql
-	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 )
 
