@@ -6,5 +6,5 @@ PORT:=5000
 run: mydevto
 	env PORT=$(PORT) ./mydevto
 
-mydevto: main.go
+mydevto: $(wildcard *.go) $(wildcard **/*.go)
 	go build -i

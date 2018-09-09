@@ -35,8 +35,9 @@ func main() {
 	_ = dbconn
 
 	r := mux.NewRouter()
+	r.StrictSlash(true)
 	r.Handle("/", http.FileServer(http.Dir("public")))
-	app.Init(r.PathPrefix("/api/").Subrouter())
+	app.Init(r.PathPrefix("/api").Subrouter(), &dbconn)
 
 	log.Printf("Running on :%s", port)
 
