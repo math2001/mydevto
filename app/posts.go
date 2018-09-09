@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/Masterminds/squirrel"
 )
 
 func posts(w http.ResponseWriter, r *http.Request) {
@@ -16,8 +18,9 @@ func posts(w http.ResponseWriter, r *http.Request) {
 func postsGet(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	var (
-		limit int
-		err   error
+		limit  int
+		userid int
+		err    error
 	)
 	if lim := q.Get("limit"); lim != "" {
 		limit, err = strconv.Atoi(lim)
@@ -27,12 +30,23 @@ func postsGet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if ui := q.Get("userid"); ui != "" {
+		userid, err = strconv.Atoi(ui)
+		if err != nil {
+			log.Printf("Invalid userid @ postsGet: %s", err)
+			writeErr(w, r, "Invalid `userid`. Should be a number", http.StatusBadRequest)
+			return
+		}
+	}
 	req := psql.Select("p.title, p.written, u.username, u.avatar").
 		From("posts p").
 		LeftJoin("users u ON p.userid = u.id").
 		OrderBy("written DESC")
 	if limit > 0 {
 		req = req.Limit(uint64(limit))
+	}
+	if userid != 0 {
+		req = req.Where(squirrel.Eq{"userid": userid})
 	}
 	sql, args, err := req.ToSql()
 	if err != nil {
