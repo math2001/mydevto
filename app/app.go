@@ -31,7 +31,6 @@ type Post struct {
 }
 
 func writeErr(w http.ResponseWriter, r *http.Request, msg string, code int) {
-	fmt.Println("error", msg)
 	enc(w, r, map[string]string{
 		"type":    "error",
 		"message": msg,

@@ -30,7 +30,7 @@ func postsGet(w http.ResponseWriter, r *http.Request) {
 	req := psql.Select("p.title, p.written, u.username, u.avatar").
 		From("posts p").
 		LeftJoin("users u ON p.userid = u.id").
-		OrderBy("written")
+		OrderBy("written DESC")
 	if limit > 0 {
 		req = req.Limit(uint64(limit))
 	}
@@ -62,5 +62,4 @@ func postsGet(w http.ResponseWriter, r *http.Request) {
 		internalErr(w, r)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 }
