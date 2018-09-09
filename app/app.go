@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/gorilla/mux"
 	"github.com/math2001/mydevto/db"
 )
 
 var dbconn *db.Conn
+var psql = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 
 // User represents a user data
 type User struct {
@@ -28,12 +30,17 @@ type Post struct {
 	User    User      `json:"user"`
 }
 
-func internalError(w http.ResponseWriter, r *http.Request) {
+func writeErr(w http.ResponseWriter, r *http.Request, msg string, code int) {
+	fmt.Println("error", msg)
 	enc(w, r, map[string]string{
 		"type":    "error",
-		"message": "Internal error",
+		"message": msg,
 	})
-	w.WriteHeader(http.StatusInternalServerError)
+	w.WriteHeader(code)
+}
+
+func internalErr(w http.ResponseWriter, r *http.Request) {
+	writeErr(w, r, "Internal error", http.StatusInternalServerError)
 }
 
 // enc writes the object to the page, formatting according the User-Agent
@@ -55,6 +62,5 @@ func home(w http.ResponseWriter, r *http.Request) {
 func Init(r *mux.Router, dbconnlocal *db.Conn) {
 	dbconn = dbconnlocal
 	r.HandleFunc("/", home)
-	r.HandleFunc("/posts", postsIndex)
-	r.HandleFunc("/posts/{action}", postsAction)
+	r.HandleFunc("/posts", posts)
 }
