@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 )
 
 var dbconn *db.Conn
-var store *sessions.CookieStore
+var store *sessions.FilesystemStore
 var psql = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 
 // User represents a user data
@@ -38,9 +39,18 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 // Init adds handlers to the router and initiates different stuff
-func Init(r *mux.Router, d *db.Conn, s *sessions.CookieStore) {
+func Init(r *mux.Router, d *db.Conn, s *sessions.FilesystemStore) {
 	dbconn = d
 	store = s
 	r.HandleFunc("/", home)
 	r.HandleFunc("/posts", posts)
+	r.HandleFunc("/set", func(w http.ResponseWriter, r *http.Request) {
+		session, err := store.Get(r, "authentication")
+		if err != nil {
+			log.Fatal(err)
+		}
+		session.Values["userid"] = 1
+		session.Save(r, w)
+		fmt.Fprintf(w, "Wrote userid: %d", session.Values["userid"])
+	})
 }

@@ -6,11 +6,11 @@ import (
 )
 
 func writeErr(w http.ResponseWriter, r *http.Request, msg string, code int) {
+	w.WriteHeader(code)
 	enc(w, r, map[string]string{
 		"type":    "error",
 		"message": msg,
 	})
-	w.WriteHeader(code)
 }
 
 func internalErr(w http.ResponseWriter, r *http.Request) {

@@ -36,14 +36,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("Connected to the database")
 
 	sessionkey := os.Getenv("SESSIONKEY")
 	if sessionkey == "" {
 		log.Fatal("$SESSIONKEY must be set")
 	}
-	store := sessions.NewCookieStore([]byte(sessionkey))
-
-	log.Printf("Connected to the database")
+	store := sessions.NewFilesystemStore("", []byte(sessionkey))
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)

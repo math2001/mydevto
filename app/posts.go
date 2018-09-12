@@ -36,11 +36,10 @@ func postsPost(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, r, "`content` POST field missing", http.StatusBadRequest)
 		return
 	}
-
 	session, err := store.Get(r, "authentication")
 	if err != nil {
 		log.Printf("Errored getting session from store @ postsPost: %s", err)
-		internalErr(w, r)
+		writeErr(w, r, "Couldn't load session. Try again.", http.StatusBadRequest)
 		return
 	}
 	userid, ok := session.Values["userid"]
@@ -49,10 +48,10 @@ func postsPost(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, r, "Authenticate first", http.StatusBadRequest)
 		return
 	}
-	fmt.Println("Insert new post")
-	fmt.Println("Title:", title)
-	fmt.Println("Content:", content)
-	fmt.Println("User id:", userid)
+	fmt.Fprintln(w, "Insert new post")
+	fmt.Fprintln(w, "Title:", title)
+	fmt.Fprintln(w, "Content:", content)
+	fmt.Fprintln(w, "User id:", userid)
 }
 
 // lists posts, according to the parameters in the URL
