@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,7 +12,47 @@ import (
 func posts(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		postsGet(w, r)
+	} else if r.Method == "POST" {
+		postsPost(w, r)
 	}
+}
+
+func postsPost(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("Errored parsing form data @ postsPost: %s", err)
+		writeErr(w, r, fmt.Sprintf("Invalid form: %s", err), http.StatusBadRequest)
+		return
+	}
+	title := r.PostForm.Get("title")
+	if title == "" {
+		log.Printf("No title provided @ postsPost")
+		writeErr(w, r, "`title` POST field missing", http.StatusBadRequest)
+		return
+	}
+	content := r.PostForm.Get("content")
+	if content == "" {
+		log.Printf("No content provided @ postsPost")
+		writeErr(w, r, "`content` POST field missing", http.StatusBadRequest)
+		return
+	}
+
+	session, err := store.Get(r, "authentication")
+	if err != nil {
+		log.Printf("Errored getting session from store @ postsPost: %s", err)
+		internalErr(w, r)
+		return
+	}
+	userid, ok := session.Values["userid"]
+	if !ok {
+		log.Printf("POST request unauthenticated @ postsPost.")
+		writeErr(w, r, "Authenticate first", http.StatusBadRequest)
+		return
+	}
+	fmt.Println("Insert new post")
+	fmt.Println("Title:", title)
+	fmt.Println("Content:", content)
+	fmt.Println("User id:", userid)
 }
 
 // lists posts, according to the parameters in the URL
