@@ -36,7 +36,7 @@ func postsPost(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, r, "`content` POST field missing", http.StatusBadRequest)
 		return
 	}
-	session, err := store.Get(r, "authentication")
+	session, err := store.Get(r, sessionauth)
 	if err != nil {
 		log.Printf("Errored getting session from store @ postsPost: %s", err)
 		writeErr(w, r, "Couldn't load session. Try again.", http.StatusBadRequest)

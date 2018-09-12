@@ -12,15 +12,31 @@ import (
 	"github.com/math2001/mydevto/db"
 )
 
-var dbconn *db.Conn
-var store *sessions.FilesystemStore
-var psql = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+const (
+	sessionauth   = "authentication"
+	servicegithub = iota
+)
 
-// User represents a user data
+var (
+	dbconn     *db.Conn
+	store      *sessions.FilesystemStore
+	r          *mux.Router
+	psql       = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+	httpclient = http.Client{
+		Timeout: 20 * time.Second,
+	}
+)
+
+// User represents user data
 type User struct {
 	Username string `json:"username"`
 	Avatar   string `json:"avatar"`
-	Token    string `json:"-"`
+	Name     string `json:"name"`
+	URL      string `json:"name"`
+	Email    string `json:"email"`
+	Location string `json:"location"`
+	Bio      string `json:"bio"`
+	// Token    string `json:"-"`
 }
 
 // Post represents a post data
@@ -39,13 +55,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 // Init adds handlers to the router and initiates different stuff
-func Init(r *mux.Router, d *db.Conn, s *sessions.FilesystemStore) {
+func Init(router *mux.Router, d *db.Conn, s *sessions.FilesystemStore) {
 	dbconn = d
 	store = s
+	r = router
 	r.HandleFunc("/", home)
 	r.HandleFunc("/posts", posts)
+	r.HandleFunc("/users/{action}", users)
 	r.HandleFunc("/set", func(w http.ResponseWriter, r *http.Request) {
-		session, err := store.Get(r, "authentication")
+		session, err := store.Get(r, sessionauth)
 		if err != nil {
 			log.Fatal(err)
 		}

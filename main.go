@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	// initiate the drivers for postgresql
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	// initiate the drivers for postgresql
 	_ "github.com/lib/pq"
 	"github.com/math2001/mydevto/app"
 	"github.com/math2001/mydevto/db"
