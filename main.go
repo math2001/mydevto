@@ -19,21 +19,29 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		log.Fatal("$PORT must be set for this server to run")
+		log.Fatal("$PORT must be set")
 	}
 
+	dblogin := os.Getenv("DBLOGIN")
+	if dblogin == "" {
+		log.Fatal("$DBLOGIN must be set")
+	}
 	dbconn, err := db.Open(db.Config{
 		Host:     "localhost",
 		Port:     "5432",
-		User:     logins["db"].username,
-		Password: logins["db"].password,
+		User:     dblogin,
+		Password: os.Getenv("DBPASSWORD"),
 		DBName:   "mydevto",
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	store := sessions.NewCookieStore([]byte(logins["session"].password))
+	sessionkey := os.Getenv("SESSIONKEY")
+	if sessionkey == "" {
+		log.Fatal("$SESSIONKEY must be set")
+	}
+	store := sessions.NewCookieStore([]byte(sessionkey))
 
 	log.Printf("Connected to the database")
 

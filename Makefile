@@ -1,11 +1,15 @@
 .PHONY: run
 .SILENT:
+.ONESHELL:
 
 PORT:=5000
 
 run: mydevto
 	clear
-	env PORT=$(PORT) ./mydevto
+	# source secret environment variables (passwords and stuff)
+	export $$(grep -v '\(^$$\|^#\)' .env | xargs)
+	export PORT=$(PORT)
+	./mydevto
 
 mydevto: $(wildcard *.go) $(wildcard **/*.go)
 	go build -i
