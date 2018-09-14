@@ -111,6 +111,11 @@ func postsGet(w http.ResponseWriter, r *http.Request) {
 		}
 		posts = append(posts, post)
 	}
+	if err = rows.Err(); err != nil {
+		log.Printf("Errored iterating rows @ postIndex: %s", err)
+		internalErr(w, r)
+		return
+	}
 	if err := enc(w, r, posts); err != nil {
 		log.Printf("Errored encoding @ postIndex: %s", err)
 		internalErr(w, r)
