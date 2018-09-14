@@ -56,6 +56,8 @@ func usersAuth(w http.ResponseWriter, r *http.Request) {
 	user, err := retrieveUserInformation(token, servicegithub)
 	if err != nil {
 		log.Printf("Errored retrieving user information from token: %s", err)
+		internalErr(w, r)
+		return
 	}
 	id, err := saveUserInformation(token, servicegithub, user)
 	if err != nil {
@@ -125,7 +127,7 @@ func getToken(sessioncode string) (string, error) {
 func retrieveUserInformation(token string, service string) (User, error) {
 	var user User
 	if service == servicegithub {
-		req, err := http.NewRequest("GET", "https://api.github.com/user?access_token"+token, nil)
+		req, err := http.NewRequest("GET", "https://api.github.com/user?access_token="+token, nil)
 		if err != nil {
 			return user, errors.Wrapf(err, "errored creating request")
 		}
@@ -133,6 +135,9 @@ func retrieveUserInformation(token string, service string) (User, error) {
 		res, err := httpclient.Do(req)
 		if err != nil {
 			return user, errors.Wrapf(err, "errored doing request")
+		}
+		if res.StatusCode != http.StatusOK {
+			return user, errors.Errorf("invalid status code: %d", res.StatusCode)
 		}
 		defer res.Body.Close()
 		dec := json.NewDecoder(res.Body)
@@ -166,6 +171,7 @@ func saveUserInformation(token string, service string, user User) (int, error) {
 	RETURNING (id)
 	`
 	var id int
+	log.Printf("Save user to database: %v", user)
 	err := dbconn.DB.QueryRow(sql, token, user.Username, user.Avatar, user.Name,
 		user.Bio, user.URL, user.Email, user.Location, service).Scan(&id)
 	return id, errors.Wrapf(err, "errored executing request")
