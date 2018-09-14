@@ -14,7 +14,7 @@ import (
 
 const (
 	sessionauth   = "authentication"
-	servicegithub = iota
+	servicegithub = "github"
 )
 
 var (
@@ -29,14 +29,14 @@ var (
 
 // User represents user data
 type User struct {
+	ID       string `json:"-"`
 	Username string `json:"username"`
 	Avatar   string `json:"avatar"`
 	Name     string `json:"name"`
-	URL      string `json:"name"`
+	URL      string `json:"url"`
 	Email    string `json:"email"`
 	Location string `json:"location"`
 	Bio      string `json:"bio"`
-	// Token    string `json:"-"`
 }
 
 // Post represents a post data

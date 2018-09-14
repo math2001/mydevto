@@ -53,9 +53,13 @@ func usersAuth(w http.ResponseWriter, r *http.Request) {
 		internalErr(w, r)
 		return
 	}
-	err = saveUserInformation(token, servicegithub)
+	user, err := retrieveUserInformation(token, servicegithub)
 	if err != nil {
-		log.Printf("Errored saving user information from token: %s", err)
+		log.Printf("Errored retrieving user information from token: %s", err)
+	}
+	id, err := saveUserInformation(token, servicegithub, user)
+	if err != nil {
+		log.Printf("Errored saving user information to database: %s", err)
 		internalErr(w, r)
 		return
 	}
@@ -65,7 +69,10 @@ func usersAuth(w http.ResponseWriter, r *http.Request) {
 		internalErr(w, r)
 		return
 	}
-
+	// not too sure what I should save here...
+	session.Values["id"] = id
+	session.Values["service"] = service
+	session.Values["email"] = user.Email
 }
 
 // removes the session cookie. Due to GitHub, we can't invalidate the token
@@ -114,7 +121,7 @@ func getToken(sessioncode string) (string, error) {
 	return token, nil
 }
 
-func retrieveUserInformation(token string, service int) (User, error) {
+func retrieveUserInformation(token string, service string) (User, error) {
 	var user User
 	if service == servicegithub {
 		req, err := http.NewRequest("GET", "https://api.github.com/user?access_token"+token, nil)
@@ -149,10 +156,16 @@ func retrieveUserInformation(token string, service int) (User, error) {
 	return user, errors.Errorf("unknown service %q to ask user informations from", service)
 }
 
-func saveUserInformation(token string, service int) error {
-	user, err := retrieveUserInformation(token, service)
-	if err != nil {
-		return errors.Wrapf(err, "errored retreiving user informations")
-	}
-	return nil
+func saveUserInformation(token string, service string, user User) (int, error) {
+	sql := `
+	INSERT INTO users (token, username, avatar, name, bio, url, email, location, service)
+	VALUE($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	ON CONFLICT DO
+	UPDATE SET username=$2, avatar=$3, name=$4, bio=$5, url=$6, email=$7, location=$8
+	RETURNING (id)
+	`
+	var id int
+	err := dbconn.DB.QueryRow(sql, token, user.Username, user.Avatar, user.Name,
+		user.Bio, user.URL, user.Email, user.Location, service).Scan(&id)
+	return id, errors.Wrapf(err, "errored executing request")
 }
