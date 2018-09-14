@@ -65,7 +65,7 @@ func usersAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	session, err := store.Get(r, sessionauth)
 	if err != nil {
-		log.Printf("Errored getting authentication session @ usersAuth")
+		log.Printf("Errored getting authentication session @ usersAuth: %s", err)
 		internalErr(w, r)
 		return
 	}
@@ -73,6 +73,7 @@ func usersAuth(w http.ResponseWriter, r *http.Request) {
 	session.Values["id"] = id
 	session.Values["service"] = service
 	session.Values["email"] = user.Email
+	session.Save(r, w)
 }
 
 // removes the session cookie. Due to GitHub, we can't invalidate the token
@@ -93,12 +94,12 @@ func getToken(sessioncode string) (string, error) {
 	params.Set("client_id", githubid)
 	params.Set("client_secret", githubsecret)
 	params.Set("code", sessioncode)
-	req, err := http.NewRequest("POST", "https://github.com/login/oath/access_token",
+	req, err := http.NewRequest("POST", "https://github.com/login/oauth/access_token",
 		strings.NewReader(params.Encode()))
 	if err != nil {
 		return "", errors.Wrapf(err, "errored building request getting token")
 	}
-	req.Header.Add("Accept", "appliation/json")
+	req.Header.Add("Accept", "application/json")
 	res, err := httpclient.Do(req)
 	if err != nil {
 		return "", errors.Wrapf(err, "errored doing request getting token")
@@ -159,8 +160,8 @@ func retrieveUserInformation(token string, service string) (User, error) {
 func saveUserInformation(token string, service string, user User) (int, error) {
 	sql := `
 	INSERT INTO users (token, username, avatar, name, bio, url, email, location, service)
-	VALUE($1, $2, $3, $4, $5, $6, $7, $8, $9)
-	ON CONFLICT DO
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+	ON CONFLICT (email, service) DO
 	UPDATE SET username=$2, avatar=$3, name=$4, bio=$5, url=$6, email=$7, location=$8
 	RETURNING (id)
 	`
