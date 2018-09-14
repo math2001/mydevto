@@ -42,16 +42,22 @@ func postsPost(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, r, "Couldn't load session. Try again.", http.StatusBadRequest)
 		return
 	}
-	userid, ok := session.Values["userid"]
+	userid, ok := session.Values["id"]
 	if !ok {
-		log.Printf("POST request unauthenticated @ postsPost.")
+		log.Printf("POST request unauthenticated @ postsPost. No 'id' in %v",
+			session.Values)
 		writeErr(w, r, "Authenticate first", http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintln(w, "Insert new post")
-	fmt.Fprintln(w, "Title:", title)
-	fmt.Fprintln(w, "Content:", content)
-	fmt.Fprintln(w, "User id:", userid)
+	sql := `
+	INSERT INTO posts (userid, title, content) VALUES ($1, $2, $3)
+	`
+	_, err = dbconn.DB.Exec(sql, userid, title, content)
+	if err != nil {
+		log.Printf("Errored inserting post in database: %s", err)
+		internalErr(w, r)
+		return
+	}
 }
 
 // lists posts, according to the parameters in the URL
