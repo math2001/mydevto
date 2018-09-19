@@ -81,6 +81,12 @@ func usersAuth(w http.ResponseWriter, r *http.Request) {
 // removes the session cookie. Due to GitHub, we can't invalidate the token
 // though
 func usersLogout(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, sessionauth)
+	if err != nil {
+		log.Printf("Errored getting authentication session @ usersLogout: %s", err)
+	}
+	session.Options.MaxAge = -1
+	session.Save(r, w)
 }
 
 func getToken(sessioncode string) (string, error) {
