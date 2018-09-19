@@ -52,7 +52,9 @@ func main() {
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)
-	r.Handle("/", http.FileServer(http.Dir("public")))
+	r.HandleFunc("/", app.Index)
+	r.PathPrefix("/static").Handler(
+		http.StripPrefix("/static", http.FileServer(http.Dir("web/static"))))
 	app.Init(r.PathPrefix("/api").Subrouter(), &dbconn, store)
 
 	log.Printf("Running on :%s", port)

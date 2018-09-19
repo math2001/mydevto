@@ -2,8 +2,10 @@ package app
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -52,6 +54,29 @@ func home(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusTeapot)
 	w.Header().Add("Content-Type", "text/plain")
 	fmt.Fprintf(w, "Hum... This is the api. Just JSON.")
+}
+
+// Index manages the index page (the only page that is directly loaded by the user)
+func Index(w http.ResponseWriter, r *http.Request) {
+	// TODO: this is dumb. When we return error, the user doesn't want json
+	// (which is what we print when we do internalErr)
+	githubid := os.Getenv("GITHUBID")
+	if githubid == "" {
+		log.Printf("$GITHUBID isn't defined. Returning")
+		internalErr(w, r)
+		return
+	}
+	t, err := template.ParseFiles("web/index.tmpl")
+	if err != nil {
+		log.Printf("Errored parsing index.html: %s", err)
+		internalErr(w, r)
+		return
+	}
+	if err := t.Execute(w, map[string]string{"GithubID": githubid}); err != nil {
+		log.Printf("Errored executing template: %s", err)
+		internalErr(w, r)
+		return
+	}
 }
 
 // Init adds handlers to the router and initiates different stuff
