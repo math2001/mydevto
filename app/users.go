@@ -84,9 +84,12 @@ func usersLogout(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, sessionauth)
 	if err != nil {
 		log.Printf("Errored getting authentication session @ usersLogout: %s", err)
+		internalErr(w, r)
+		return
 	}
 	session.Options.MaxAge = -1
 	session.Save(r, w)
+	writeSuc(w, r, "Logged out")
 }
 
 func getToken(sessioncode string) (string, error) {

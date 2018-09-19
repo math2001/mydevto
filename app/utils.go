@@ -5,12 +5,20 @@ import (
 	"net/http"
 )
 
-func writeErr(w http.ResponseWriter, r *http.Request, msg string, code int) {
+func writeMsg(w http.ResponseWriter, r *http.Request, kind string, msg string, code int) {
 	w.WriteHeader(code)
 	enc(w, r, map[string]string{
-		"type":    "error",
+		"type":    kind,
 		"message": msg,
 	})
+}
+
+func writeErr(w http.ResponseWriter, r *http.Request, msg string, code int) {
+	writeMsg(w, r, "error", msg, code)
+}
+
+func writeSuc(w http.ResponseWriter, r *http.Request, msg string) {
+	writeMsg(w, r, "error", msg, http.StatusOK)
 }
 
 func internalErr(w http.ResponseWriter, r *http.Request) {
