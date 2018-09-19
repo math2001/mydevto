@@ -5,8 +5,9 @@
     <title>My dev.to</title>
 </head>
 <body>
-    Please login if it isn't already the case
-    <a href="https://github.com/login/oauth/authorize?client_id={{.GithubClient}}"></a>
+    <a id='login' href="https://github.com/login/oauth/authorize?client_id={{.GithubID}}">
+        Login
+    </a>
 
     <script src='static/app.js'></script>
 </body>
