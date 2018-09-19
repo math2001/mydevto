@@ -42,7 +42,13 @@ func main() {
 	if sessionkey == "" {
 		log.Fatal("$SESSIONKEY must be set")
 	}
+
 	store := sessions.NewFilesystemStore("", []byte(sessionkey))
+	store.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   30 * 24 * 60 * 60, // 30 days,
+		HttpOnly: true,
+	}
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)
