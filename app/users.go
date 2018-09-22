@@ -24,6 +24,8 @@ func users(w http.ResponseWriter, r *http.Request) {
 		usersLogout(w, r)
 	} else if action == "auth" {
 		usersAuth(w, r)
+	} else if action == "get" {
+		usersGet(w, r)
 	} else {
 		log.Printf("Unknown action %q", action)
 		writeErr(w, r, "Unkown action", http.StatusBadRequest)
@@ -71,11 +73,18 @@ func usersAuth(w http.ResponseWriter, r *http.Request) {
 		internalErr(w, r)
 		return
 	}
-	// not too sure what I should save here...
 	session.Values["id"] = id
-	session.Values["service"] = service
+
+	session.Values["username"] = user.Username
+	session.Values["avatar"] = user.Avatar
+	session.Values["name"] = user.Name
+	session.Values["bio"] = user.Bio
+	session.Values["url"] = user.URL
 	session.Values["email"] = user.Email
+	session.Values["location"] = user.Location
+
 	session.Save(r, w)
+	fmt.Fprintf(w, "<script>window.close()</script>")
 }
 
 // removes the session cookie. Due to GitHub, we can't invalidate the token
@@ -90,6 +99,30 @@ func usersLogout(w http.ResponseWriter, r *http.Request) {
 	session.Options.MaxAge = -1
 	session.Save(r, w)
 	writeSuc(w, r, "Logged out")
+}
+
+// usersGet returns the information about the logged in user
+func usersGet(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, sessionauth)
+	if err != nil {
+		log.Printf("Errored getting authentication session @ usersGet: %s", err)
+		internalErr(w, r)
+		return
+	}
+	if _, ok := session.Values["id"]; !ok {
+		writeErr(w, r, "Please login", http.StatusBadRequest)
+		return
+	}
+	enc(w, r, map[string]interface{}{
+		"id":       session.Values["id"],
+		"username": session.Values["username"],
+		"avatar":   session.Values["avatar"],
+		"name":     session.Values["name"],
+		"bio":      session.Values["bio"],
+		"url":      session.Values["url"],
+		"email":    session.Values["email"],
+		"location": session.Values["location"],
+	})
 }
 
 func getToken(sessioncode string) (string, error) {

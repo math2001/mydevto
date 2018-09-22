@@ -59,7 +59,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 // Index manages the index page (the only page that is directly loaded by the user)
 func Index(w http.ResponseWriter, r *http.Request) {
 	// TODO: this is dumb. When we return error, the user doesn't want json
-	// (which is what we print when we do internalErr)
+	// (which is what we write when we do internalErr)
 	githubid := os.Getenv("GITHUBID")
 	if githubid == "" {
 		log.Printf("$GITHUBID isn't defined. Returning")
