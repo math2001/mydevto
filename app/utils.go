@@ -18,7 +18,7 @@ func writeErr(w http.ResponseWriter, r *http.Request, msg string, code int) {
 }
 
 func writeSuc(w http.ResponseWriter, r *http.Request, msg string) {
-	writeMsg(w, r, "error", msg, http.StatusOK)
+	writeMsg(w, r, "success", msg, http.StatusOK)
 }
 
 func internalErr(w http.ResponseWriter, r *http.Request) {
