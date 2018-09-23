@@ -1,0 +1,1 @@
+- ditch gorilla/sessions. Make my own or look for a decent library
