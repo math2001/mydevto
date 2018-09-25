@@ -39,6 +39,7 @@ func InternalError(w http.ResponseWriter, r *http.Request) error {
 
 // Encode writes the object to the page, formatting according the User-Agent
 func Encode(w http.ResponseWriter, r *http.Request, e interface{}) error {
+	w.Header().Add("Content-Type", "application/json")
 	enc := json.NewEncoder(w)
 	if r.UserAgent() != "js" {
 		enc.SetIndent("", "  ")
