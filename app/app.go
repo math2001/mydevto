@@ -80,12 +80,12 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 // Init adds handlers to the router and initiates different stuff
-func Init(router *mux.Router, d *db.Conn, s *sessions.FilesystemStore) {
-	dbconn = d
-	store = s
+func Init(router *mux.Router, services map[string]interface{}) {
+	dbconn = services["db"].(*db.Conn)
+	store = services["store"].(sessions.FileSystemStore)
 	r = router
 	r.HandleFunc("/", home)
-	r.HandleFunc("/posts", posts)
+	handlePosts(r.PathPrefix("/posts").Subrouter())
 	r.HandleFunc("/users/{action}", users)
 	r.HandleFunc("/set", func(w http.ResponseWriter, r *http.Request) {
 		session, err := store.Get(r, sessionauth)

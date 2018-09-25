@@ -8,15 +8,15 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	// initiate the drivers for postgresql
 	_ "github.com/lib/pq"
 	"github.com/math2001/mydevto/app"
 	"github.com/math2001/mydevto/db"
 )
 
-func main() {
+type Services struct{}
 
+func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")
@@ -38,16 +38,9 @@ func main() {
 	}
 	log.Printf("Connected to the database")
 
-	sessionkey := os.Getenv("SESSIONKEY")
-	if sessionkey == "" {
-		log.Fatal("$SESSIONKEY must be set")
-	}
-
-	store := sessions.NewFilesystemStore("", []byte(sessionkey))
-	store.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   30 * 24 * 60 * 60, // 30 days,
-		HttpOnly: true,
+	services = map[string]interface{}{
+		"db":    &dbconn,
+		"store": store,
 	}
 
 	r := mux.NewRouter()
@@ -55,7 +48,7 @@ func main() {
 	r.HandleFunc("/", app.Index)
 	r.PathPrefix("/static").Handler(
 		http.StripPrefix("/static", http.FileServer(http.Dir("web/static"))))
-	app.Init(r.PathPrefix("/api").Subrouter(), &dbconn, store)
+	app.Init(r.PathPrefix("/api").Subrouter(), services)
 
 	log.Printf("Running on :%s", port)
 
