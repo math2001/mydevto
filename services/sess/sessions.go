@@ -1,4 +1,4 @@
-package sessions
+package sess
 
 import (
 	"log"
