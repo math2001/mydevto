@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+
 	// initiate the drivers for postgresql
 	_ "github.com/lib/pq"
 )
@@ -57,7 +58,8 @@ func Init() {
 		log.Fatal("Invalid configuration to connect to database")
 	}
 
-	db, err := sql.Open("postgres", cfg.String())
+	var err error
+	db, err = sql.Open("postgres", cfg.String())
 
 	if err != nil {
 		log.Fatalf("Errored opening connection to database: %s", err)
@@ -71,5 +73,8 @@ func Init() {
 // DB returns a pointer to the existing connection. Note that it might be nil
 // if Open hasn't been called before hand
 func DB() *sql.DB {
+	if db == nil {
+		log.Printf("Yep, you didn't call db.Init()...")
+	}
 	return db
 }
