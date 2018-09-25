@@ -4,10 +4,7 @@ package resp
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-
-	"github.com/pkg/errors"
 )
 
 // Message writes a response in the form { "type": <str>, "message": <str> }
@@ -39,13 +36,6 @@ func Success(w http.ResponseWriter, r *http.Request, format string, a ...interfa
 // sensitive, and we don't want to give too much information
 func InternalError(w http.ResponseWriter, r *http.Request) error {
 	return Error(w, r, http.StatusInternalServerError, "Internal error")
-}
-
-// HandleError logs the error and writes internal error. The idea is to make
-// how sensitive errors are handle easy to change (log isn't the best thing)
-func HandleError(w http.ResponseWriter, r *http.Request, err error, format string, a ...interface{}) {
-	log.Print(errors.Wrapf(err, fmt.Sprintf(format, a...)))
-	InternalError(w, r)
 }
 
 // Encode writes the object to the page, formatting according the User-Agent
