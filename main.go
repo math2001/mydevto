@@ -10,7 +10,6 @@ import (
 	"github.com/gorilla/mux"
 	// initiate the drivers for postgresql
 	_ "github.com/lib/pq"
-	"github.com/math2001/mydevto/app"
 )
 
 func main() {
@@ -21,10 +20,10 @@ func main() {
 
 	r := mux.NewRouter()
 	r.StrictSlash(true)
-	r.HandleFunc("/", app.Index)
+	r.HandleFunc("/", index)
 	r.PathPrefix("/static").Handler(
 		http.StripPrefix("/static", http.FileServer(http.Dir("web/static"))))
-	app.Init(r.PathPrefix("/api").Subrouter(), services)
+	initAPI(r.PathPrefix("/api").Subrouter())
 
 	log.Printf("Running on :%s", port)
 
