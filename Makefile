@@ -11,5 +11,5 @@ run: mydevto
 	export PORT=$(PORT)
 	./mydevto
 
-mydevto: $(wildcard *.go) $(wildcard **/*.go)
+mydevto: $(shell find . -type f -name "*.go")
 	go build -i
