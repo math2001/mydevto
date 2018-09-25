@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/math2001/mydevto/services/db"
 	"github.com/pkg/errors"
 )
 
@@ -214,7 +215,7 @@ func saveUserInformation(token string, service string, user User) (int, error) {
 	`
 	var id int
 	log.Printf("Save user to database: %v", user)
-	err := dbconn.DB.QueryRow(sql, token, user.Username, user.Avatar, user.Name,
+	err := db.DB().QueryRow(sql, token, user.Username, user.Avatar, user.Name,
 		user.Bio, user.URL, user.Email, user.Location, service).Scan(&id)
 	return id, errors.Wrapf(err, "errored executing request")
 }

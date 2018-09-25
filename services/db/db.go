@@ -3,32 +3,16 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"os"
 	"strings"
-
-	"github.com/pkg/errors"
 )
+
+var db *sql.DB
 
 // a dodgy escape for the connection string
 func escape(s string) string {
 	return fmt.Sprintf("'%s'", strings.Replace(s, "'", "\\'", -1))
-}
-
-// Conn holds the connection to the database
-type Conn struct {
-	cfg Config
-	DB  *sql.DB
-}
-
-// Close releases resources that 'sql/database' used
-func (conn *Conn) Close() error {
-	if conn.DB == nil {
-		return errors.New("unexisting connection to database")
-	}
-	if err := conn.DB.Close(); err != nil {
-		return errors.Wrapf(err,
-			"errored closing the connection")
-	}
-	return nil
 }
 
 // Config holds the configuration to connect to the database
@@ -54,25 +38,36 @@ func (cfg Config) valid() bool {
 	return cfg.Host != "" && cfg.Port != "" && cfg.User != "" && cfg.DBName != ""
 }
 
-// Open creates a connection to the database with the given connection
-func Open(cfg Config) (Conn, error) {
-	var conn Conn
-	if !cfg.valid() {
-		return conn, fmt.Errorf("invalid configuration %s", cfg)
+// creates a connection to the database with the given configuration
+func init() {
+	dblogin := os.Getenv("DBLOGIN")
+	if dblogin == "" {
+		log.Fatal("$DBLOGIN must be set")
 	}
-	conn.cfg = cfg
+	cfg := Config{
+		Host:     "localhost",
+		Port:     "5432",
+		User:     dblogin,
+		Password: os.Getenv("DBPASSWORD"),
+		DBName:   "mydevto",
+	}
+	if !cfg.valid() {
+		log.Fatal("Invalid configuration to connect to database")
+	}
 
 	db, err := sql.Open("postgres", cfg.String())
 
 	if err != nil {
-		return conn, errors.Wrapf(err, "errored opening connection to database %s", cfg)
+		log.Fatalf("Errored opening connection to database: %s", err)
 	}
 
 	if err := db.Ping(); err != nil {
-		return conn, errors.Wrapf(err, "errored pinging database %s", cfg)
+		log.Fatalf("Errored pinging database: %s", err)
 	}
+}
 
-	conn.DB = db
-
-	return conn, nil
+// DB returns a pointer to the existing connection. Note that it might be nil
+// if Open hasn't been called before hand
+func DB() *sql.DB {
+	return db
 }
