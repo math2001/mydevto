@@ -23,7 +23,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	service := query.Get("service")
 	if service != "github" {
 		log.Printf("Invalid service %q trying to authenticate @ usersAuth", service)
-		resp.Error(w, r, "Invalid service", http.StatusBadRequest)
+		resp.Error(w, r, http.StatusBadRequest, "Invalid service")
 		return
 	}
 	sessioncode := query.Get("code")

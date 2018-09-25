@@ -2,7 +2,6 @@ package posts
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -19,8 +18,8 @@ func get(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idstring)
 	if err != nil {
 		log.Printf("Couldn't convert id %q to integer: %s", idstring, err)
-		resp.Error(w, r, fmt.Sprintf("Couldn't convert id %q to integer", idstring),
-			http.StatusBadRequest)
+		resp.Error(w, r, http.StatusBadRequest,
+			"Couldn't convert id %q to integer", idstring)
 		return
 	}
 	p := controllers.Post{}
@@ -37,8 +36,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 	if err == sql.ErrNoRows {
 		log.Printf("Couldn't find post with id %d", id)
-		resp.Error(w, r, fmt.Sprintf("No post found with id %d", id),
-			http.StatusBadRequest)
+		resp.Error(w, r, http.StatusBadRequest, "No post found with id %d", id)
 	} else if err != nil {
 		log.Printf("Errored querying post from id %d: %s", id, err)
 		resp.InternalError(w, r)
