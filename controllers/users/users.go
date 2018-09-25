@@ -1,4 +1,4 @@
-package app
+package users
 
 import (
 	"encoding/json"
@@ -13,18 +13,6 @@ import (
 	"github.com/math2001/mydevto/services/db"
 	"github.com/pkg/errors"
 )
-
-// User represents user data
-type User struct {
-	ID       string `json:"-"`
-	Username string `json:"username"`
-	Avatar   string `json:"avatar"`
-	Name     string `json:"name"`
-	URL      string `json:"url"`
-	Email    string `json:"email"`
-	Location string `json:"location"`
-	Bio      string `json:"bio"`
-}
 
 func users(w http.ResponseWriter, r *http.Request) {
 	action, ok := mux.Vars(r)["action"]
