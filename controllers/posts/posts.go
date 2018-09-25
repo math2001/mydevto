@@ -2,9 +2,11 @@ package posts
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/math2001/mydevto/controllers"
 )
 
 // Manage defines which routes are triggering specific functions
 func Manage(r *mux.Router) {
-	r.HandleFunc("/get/{id}", get)
+	r.Handle("/", controllers.ListRoutes{Router: r}).Methods("GET")
+	r.HandleFunc("/get/{id}", get).Methods("GET")
 }
