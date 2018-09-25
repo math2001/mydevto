@@ -11,8 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/math2001/mydevto/controllers/posts"
 	"github.com/math2001/mydevto/controllers/users"
-	// initiate the drivers for postgresql
-	_ "github.com/lib/pq"
+	"github.com/math2001/mydevto/services/db"
 )
 
 // This is the homepage, the only page the user is going to load directly
@@ -62,6 +61,7 @@ func main() {
 		http.StripPrefix("/static", http.FileServer(http.Dir("web/static"))))
 	initAPI(r.PathPrefix("/api").Subrouter())
 
+	db.Init()
 	log.Printf("Running on :%s", port)
 
 	server := &http.Server{

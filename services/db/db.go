@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"strings"
+	// initiate the drivers for postgresql
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
@@ -38,8 +40,8 @@ func (cfg Config) valid() bool {
 	return cfg.Host != "" && cfg.Port != "" && cfg.User != "" && cfg.DBName != ""
 }
 
-// creates a connection to the database with the given configuration
-func init() {
+// Init creates a connection to the database with the given configuration
+func Init() {
 	dblogin := os.Getenv("DBLOGIN")
 	if dblogin == "" {
 		log.Fatal("$DBLOGIN must be set")
