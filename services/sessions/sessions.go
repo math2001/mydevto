@@ -25,7 +25,7 @@ func init() {
 	}
 }
 
-// Get returns the store to use
-func Get() *sessions.FilesystemStore {
+// Store returns the store to use
+func Store() *sessions.FilesystemStore {
 	return store
 }

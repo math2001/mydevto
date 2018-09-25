@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/math2001/mydevto/controllers/posts"
+	"github.com/math2001/mydevto/controllers/users"
 	// initiate the drivers for postgresql
 	_ "github.com/lib/pq"
 )

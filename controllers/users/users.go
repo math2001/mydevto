@@ -10,68 +10,57 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/math2001/mydevto/controllers"
+	"github.com/math2001/mydevto/resp"
 	"github.com/math2001/mydevto/services/db"
+	"github.com/math2001/mydevto/services/sessions"
 	"github.com/pkg/errors"
 )
 
-func users(w http.ResponseWriter, r *http.Request) {
-	action, ok := mux.Vars(r)["action"]
-	if !ok {
-		log.Printf("No action specified @ users")
-		writeErr(w, r, "No action specified", http.StatusBadRequest)
-		return
-	}
-	if action == "logout" {
-		usersLogout(w, r)
-	} else if action == "auth" {
-		usersAuth(w, r)
-	} else if action == "get" {
-		usersGet(w, r)
-	} else {
-		log.Printf("Unknown action %q", action)
-		writeErr(w, r, "Unkown action", http.StatusBadRequest)
-		return
-	}
+// Manage is delegated the charges of mapping routes to functions by the main
+// package
+func Manage(r *mux.Router) {
+	r.HandleFunc("/auth", auth)
 }
 
-// usersAuth is called by the service with 'service' as the name in the
+// auth is called by the service with 'service' as the name in the
 // parameters, and finishes the auth flow. It's the 'callback'
-func usersAuth(w http.ResponseWriter, r *http.Request) {
+func auth(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	service := query.Get("service")
 	if service != "github" {
 		log.Printf("Invalid service %q trying to authenticate @ usersAuth", service)
-		writeErr(w, r, "Invalid service", http.StatusBadRequest)
+		resp.Error(w, r, "Invalid service", http.StatusBadRequest)
 		return
 	}
 	sessioncode := query.Get("code")
 	if sessioncode == "" {
 		log.Printf("No session code in URL parameter @ usersAuth#%q", service)
-		internalErr(w, r)
+		resp.InternalError(w, r)
 		return
 	}
 	token, err := getToken(sessioncode)
 	if err != nil {
 		log.Printf("Errored getting token: %s", err)
-		internalErr(w, r)
+		resp.InternalError(w, r)
 		return
 	}
-	user, err := retrieveUserInformation(token, servicegithub)
+	user, err := retrieveUserInformation(token, controllers.ServiceGithub)
 	if err != nil {
 		log.Printf("Errored retrieving user information from token: %s", err)
-		internalErr(w, r)
+		resp.InternalError(w, r)
 		return
 	}
-	id, err := saveUserInformation(token, servicegithub, user)
+	id, err := saveUserInformation(token, controllers.ServiceGithub, user)
 	if err != nil {
 		log.Printf("Errored saving user information to database: %s", err)
-		internalErr(w, r)
+		resp.InternalError(w, r)
 		return
 	}
-	session, err := store.Get(r, sessionauth)
+	session, err := sessions.Store().Get(r, controllers.SessionAuth)
 	if err != nil {
 		log.Printf("Errored getting authentication session @ usersAuth: %s", err)
-		internalErr(w, r)
+		resp.InternalError(w, r)
 		return
 	}
 	session.Values["id"] = id
@@ -88,44 +77,8 @@ func usersAuth(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<script>window.close()</script>")
 }
 
-// removes the session cookie. Due to GitHub, we can't invalidate the token
-// though
-func usersLogout(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, sessionauth)
-	if err != nil {
-		log.Printf("Errored getting authentication session @ usersLogout: %s", err)
-		internalErr(w, r)
-		return
-	}
-	session.Options.MaxAge = -1
-	session.Save(r, w)
-	writeSuc(w, r, "Logged out")
-}
-
-// usersGet returns the information about the logged in user
-func usersGet(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, sessionauth)
-	if err != nil {
-		log.Printf("Errored getting authentication session @ usersGet: %s", err)
-		internalErr(w, r)
-		return
-	}
-	if _, ok := session.Values["id"]; !ok {
-		writeErr(w, r, "Please login", http.StatusBadRequest)
-		return
-	}
-	enc(w, r, map[string]interface{}{
-		"id":       session.Values["id"],
-		"username": session.Values["username"],
-		"avatar":   session.Values["avatar"],
-		"name":     session.Values["name"],
-		"bio":      session.Values["bio"],
-		"url":      session.Values["url"],
-		"email":    session.Values["email"],
-		"location": session.Values["location"],
-	})
-}
-
+// getToken retrieves the token from a temporary code (this is part of the
+// oauth flow)
 func getToken(sessioncode string) (string, error) {
 	params := url.Values{}
 	githubid := os.Getenv("GITHUBID")
@@ -145,7 +98,7 @@ func getToken(sessioncode string) (string, error) {
 		return "", errors.Wrapf(err, "errored building request getting token")
 	}
 	req.Header.Add("Accept", "application/json")
-	res, err := httpclient.Do(req)
+	res, err := controllers.HTTPClient.Do(req)
 	if err != nil {
 		return "", errors.Wrapf(err, "errored doing request getting token")
 	}
@@ -167,15 +120,16 @@ func getToken(sessioncode string) (string, error) {
 	return token, nil
 }
 
-func retrieveUserInformation(token string, service string) (User, error) {
-	var user User
-	if service == servicegithub {
+// Gets the user information from a token
+func retrieveUserInformation(token string, service string) (controllers.User, error) {
+	var user controllers.User
+	if service == controllers.ServiceGithub {
 		req, err := http.NewRequest("GET", "https://api.github.com/user?access_token="+token, nil)
 		if err != nil {
 			return user, errors.Wrapf(err, "errored creating request")
 		}
 		req.Header.Add("Accept", "application/json")
-		res, err := httpclient.Do(req)
+		res, err := controllers.HTTPClient.Do(req)
 		if err != nil {
 			return user, errors.Wrapf(err, "errored doing request")
 		}
@@ -205,7 +159,9 @@ func retrieveUserInformation(token string, service string) (User, error) {
 	return user, errors.Errorf("unknown service %q to ask user informations from", service)
 }
 
-func saveUserInformation(token string, service string, user User) (int, error) {
+// Saves the user information into the database, returning the ID of that user,
+// and an error, if any.
+func saveUserInformation(token string, service string, user controllers.User) (int, error) {
 	sql := `
 	INSERT INTO users (token, username, avatar, name, bio, url, email, location, service)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
