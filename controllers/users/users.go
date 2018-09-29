@@ -9,5 +9,7 @@ import (
 // package
 func Manage(r *mux.Router) {
 	r.Handle("/", controllers.ListRoutes{Router: r}).Methods("GET")
-	r.HandleFunc("/auth", auth)
+	// in there documentation, github say they send a POST request, but they
+	// actually send a GET... :(
+	r.HandleFunc("/auth", auth).Methods("GET")
 }

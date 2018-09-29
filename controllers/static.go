@@ -24,7 +24,7 @@ var HTTPClient = http.Client{
 type Post struct {
 	Title   string    `json:"title"`
 	Updated time.Time `json:"updated"`
-	Written string    `json:"written,omitempty"`
+	Written time.Time `json:"written,omitempty"`
 	Content string    `json:"content,omitempty"`
 	User    User      `json:"user"`
 }

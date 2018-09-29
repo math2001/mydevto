@@ -12,4 +12,4 @@ run: mydevto
 	./mydevto
 
 mydevto: $(shell find . -type f -name "*.go")
-	go build -i
+	go build
