@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -18,26 +20,22 @@ import (
 var router *mux.Router
 
 // This is the homepage, the only page the user is going to load directly
-func index(w http.ResponseWriter, r *http.Request) {
-	// TODO: this is dumb. When we return error, the user doesn't want json
-	// (which is what we write when we do internalErr)
+func index() http.HandlerFunc {
 	githubid := os.Getenv("GITHUBID")
 	if githubid == "" {
-		log.Printf("$GITHUBID isn't defined.")
-		http.Error(w, "Invalid configuration: GITHUBID isn't defined",
-			http.StatusInternalServerError)
-		return
+		log.Fatalf("$GITHUBID isn't defined.")
 	}
 	t, err := template.ParseFiles("web/index.tmpl")
 	if err != nil {
-		log.Printf("Errored parsing index.html: %s", err)
-		http.Error(w, "Couldn't parse index template.", http.StatusInternalServerError)
-		return
+		log.Fatalf("Errored parsing index.html: %s", err)
 	}
-	if err := t.Execute(w, map[string]string{"GithubID": githubid}); err != nil {
-		log.Printf("Errored executing template: %s", err)
-		http.Error(w, "Couldn't execute template.", http.StatusInternalServerError)
-		return
+	var b bytes.Buffer
+	if err := t.Execute(&b, map[string]string{"GithubID": githubid}); err != nil {
+		log.Fatalf("Errored executing template: %s", err)
+	}
+	var html = b.String()
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, html)
 	}
 }
 
@@ -55,7 +53,7 @@ func main() {
 
 	router = mux.NewRouter()
 	router.StrictSlash(true)
-	router.HandleFunc("/", index)
+	router.HandleFunc("/", index())
 	router.PathPrefix("/static").Handler(
 		http.StripPrefix("/static", http.FileServer(http.Dir("web/static"))))
 	initAPI(router.PathPrefix("/api").Subrouter())
