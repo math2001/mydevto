@@ -15,7 +15,12 @@ import (
 	"github.com/math2001/mydevto/controllers/posts"
 	"github.com/math2001/mydevto/controllers/users"
 	"github.com/math2001/mydevto/services/db"
+	"github.com/math2001/mydevto/services/uli"
 )
+
+// the version is determined at compile time, from the git tags.
+// See Makefile
+var version = "undefined"
 
 var router *mux.Router
 
@@ -59,6 +64,7 @@ func main() {
 	initAPI(router.PathPrefix("/api").Subrouter())
 
 	db.Init()
+	uli.Init(version)
 	log.Printf("Running on :%s", port)
 
 	server := &http.Server{
