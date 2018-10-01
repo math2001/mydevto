@@ -1,6 +1,7 @@
 package users
 
 import (
+	"log"
 	"net/http"
 	"os"
 
@@ -30,6 +31,13 @@ func Current(r *http.Request) *controllers.User {
 		// is platform dependent.
 		// Anyway, even if it isn't, the results the same: the user isn't
 		// logged in
+		return nil
+	} else if err != nil {
+		log.Printf("Errored getting auth session: %s", err)
+		return nil
+	}
+	if len(session.Values) == 0 {
+		// nothing has been found
 		return nil
 	}
 	u := &controllers.User{}
