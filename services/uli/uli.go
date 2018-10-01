@@ -52,14 +52,14 @@ func createfile(version string) io.Writer {
 
 // Printf logs the message with the request identification at the beginning.
 func Printf(r *http.Request, format string, a ...interface{}) {
-	logger.Printf("%s %s", r.RemoteAddr, fmt.Sprintf(format, a...))
+	logger.Printf("%s %s %s", r.RemoteAddr, r.RequestURI, fmt.Sprintf(format, a...))
 }
 
 // Middleware is the middleware that mux will use
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		Printf(r, "Start handling request...")
+		Printf(r, "Handling")
 		next.ServeHTTP(w, r)
-		Printf(r, "Finished handling request.")
+		Printf(r, "Finished")
 	})
 }
