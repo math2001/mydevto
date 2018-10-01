@@ -1,4 +1,4 @@
-.PHONY: run
+.PHONY: run version testdb
 .SILENT:
 .ONESHELL:
 
@@ -23,4 +23,4 @@ version:
 testdb:
 	export $$(grep -v '\(^$$\|^#\)' test.env | xargs)
 	createdb $$DBNAME || echo "-> Error ignored. Creating schema..."
-	psql -U $$DBLOGIN -d $$DBNAME -f ./bin/schema.pgsql
+	psql -U $$DBLOGIN -d $$DBNAME -f ./bin/schema.pgsql -f ./bin/populate_test.pgsql

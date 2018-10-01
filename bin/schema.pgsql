@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS users (
 	id        SERIAL,
 	token     VARCHAR(255),
-	service   VARCHAR(1024),
+	service   VARCHAR(1024) NOT NULL,
+	email     VARCHAR(255) NOT NULL,
 	username  VARCHAR(255),
 	avatar    VARCHAR(255),
 	name      VARCHAR(255),
 	bio       VARCHAR(255),
 	url       VARCHAR(255),
-	email     VARCHAR(255),
 	updated   TIMESTAMPTZ DEFAULT  now(),
 	PRIMARY KEY (id),
 	UNIQUE (email, service)
