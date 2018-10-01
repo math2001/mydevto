@@ -1,13 +1,13 @@
 package users
 
 import (
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/math2001/mydevto/controllers"
 	"github.com/math2001/mydevto/services/sess"
+	"github.com/math2001/mydevto/services/uli"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -33,7 +33,7 @@ func Current(r *http.Request) *controllers.User {
 		// logged in
 		return nil
 	} else if err != nil {
-		log.Printf("Errored getting auth session: %s", err)
+		uli.Printf(r, "Errored getting auth session: %s", err)
 		return nil
 	}
 	if len(session.Values) == 0 {

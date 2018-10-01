@@ -1,13 +1,13 @@
 package posts
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/math2001/mydevto/controllers"
 	"github.com/math2001/mydevto/resp"
 	"github.com/math2001/mydevto/services/db"
+	"github.com/math2001/mydevto/services/uli"
 	"github.com/math2001/sibu"
 )
 
@@ -21,7 +21,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 	if lim := q.Get("limit"); lim != "" {
 		limit, err = strconv.Atoi(lim)
 		if err != nil {
-			log.Printf("Invalid limit @ postsGet: %s", err)
+			uli.Printf(r, "Invalid limit @ postsGet: %s", err)
 			resp.Error(w, r, http.StatusBadRequest,
 				"Invalid `limit`. Should be a number")
 			return
@@ -30,7 +30,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 	if ui := q.Get("userid"); ui != "" {
 		userid, err = strconv.Atoi(ui)
 		if err != nil {
-			log.Printf("Invalid userid @ postsGet: %s", err)
+			uli.Printf(r, "Invalid userid @ postsGet: %s", err)
 			resp.Error(w, r, http.StatusBadRequest, "Invalid `userid`. Should be a number")
 			return
 		}
@@ -49,14 +49,14 @@ func list(w http.ResponseWriter, r *http.Request) {
 	}
 	sql, args, err := b.Query()
 	if err != nil {
-		log.Printf("Errored building sql request @ postIndex: %s", err)
+		uli.Printf(r, "Errored building sql request @ postIndex: %s", err)
 		resp.InternalError(w, r)
 		return
 	}
-	log.Printf("Querying @ postIndex: %q %v", sql, args)
+	uli.Printf(r, "Querying @ postIndex: %q %v", sql, args)
 	rows, err := db.DB().Query(sql, args...)
 	if err != nil {
-		log.Printf("Errored querying @ postIndex: %s", err)
+		uli.Printf(r, "Errored querying @ postIndex: %s", err)
 		resp.InternalError(w, r)
 		return
 	}
@@ -67,14 +67,14 @@ func list(w http.ResponseWriter, r *http.Request) {
 		err := rows.Scan(&p.Title, &p.Content, &p.Written, &p.Updated, &u.Name,
 			&u.Username, &u.Avatar, &u.Bio, &u.URL, &u.Email, &u.Location)
 		if err != nil {
-			log.Printf("Errored scanning rows @ postIndex: %s", err)
+			uli.Printf(r, "Errored scanning rows @ postIndex: %s", err)
 			resp.InternalError(w, r)
 			return
 		}
 		posts = append(posts, p)
 	}
 	if err := rows.Err(); err != nil {
-		log.Printf("Errored during iteration @ postIndex: %s", err)
+		uli.Printf(r, "Errored during iteration @ postIndex: %s", err)
 		resp.InternalError(w, r)
 		return
 	}

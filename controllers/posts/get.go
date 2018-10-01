@@ -2,7 +2,6 @@ package posts
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/math2001/mydevto/controllers"
 	"github.com/math2001/mydevto/resp"
 	"github.com/math2001/mydevto/services/db"
+	"github.com/math2001/mydevto/services/uli"
 )
 
 // get gets a post by id
@@ -17,7 +17,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 	idstring := mux.Vars(r)["id"]
 	id, err := strconv.Atoi(idstring)
 	if err != nil {
-		log.Printf("Couldn't convert id %q to integer: %s", idstring, err)
+		uli.Printf(r, "Couldn't convert id %q to integer: %s", idstring, err)
 		resp.Error(w, r, http.StatusBadRequest,
 			"Couldn't convert id %q to integer", idstring)
 		return
@@ -35,10 +35,10 @@ func get(w http.ResponseWriter, r *http.Request) {
 		&u.Bio, &u.URL, &u.Avatar, &u.Name)
 
 	if err == sql.ErrNoRows {
-		log.Printf("Couldn't find post with id %d", id)
+		uli.Printf(r, "Couldn't find post with id %d", id)
 		resp.Error(w, r, http.StatusBadRequest, "No post found with id %d", id)
 	} else if err != nil {
-		log.Printf("Errored querying post from id %d: %s", id, err)
+		uli.Printf(r, "Errored querying post from id %d: %s", id, err)
 		resp.InternalError(w, r)
 	} else {
 		resp.Encode(w, r, p)

@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/math2001/mydevto/resp"
+	"github.com/math2001/mydevto/services/uli"
 )
 
 // ListRoutes is a little utility that lists every routes that router (or
@@ -36,7 +36,7 @@ func (lr ListRoutes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 	if err != nil {
-		log.Printf("Errored walking routes: %s", err)
+		uli.Printf(r, "Errored walking routes: %s", err)
 		resp.InternalError(w, r)
 		return
 	}

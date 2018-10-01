@@ -3,7 +3,6 @@ package users
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"github.com/math2001/mydevto/resp"
 	"github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/services/sess"
+	"github.com/math2001/mydevto/services/uli"
 	"github.com/pkg/errors"
 )
 
@@ -22,37 +22,37 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	service := query.Get("service")
 	if service != "github" {
-		log.Printf("Invalid service %q trying to authenticate @ usersAuth", service)
+		uli.Printf(r, "Invalid service %q trying to authenticate @ usersAuth", service)
 		resp.Error(w, r, http.StatusBadRequest, "Invalid service")
 		return
 	}
 	sessioncode := query.Get("code")
 	if sessioncode == "" {
-		log.Printf("No session code in URL parameter @ usersAuth#%q", service)
+		uli.Printf(r, "No session code in URL parameter @ usersAuth#%q", service)
 		resp.InternalError(w, r)
 		return
 	}
 	token, err := getToken(sessioncode)
 	if err != nil {
-		log.Printf("Errored getting token: %s", err)
+		uli.Printf(r, "Errored getting token: %s", err)
 		resp.InternalError(w, r)
 		return
 	}
 	user, err := retrieveUserInformation(token, controllers.ServiceGithub)
 	if err != nil {
-		log.Printf("Errored retrieving user information from token: %s", err)
+		uli.Printf(r, "Errored retrieving user information from token: %s", err)
 		resp.InternalError(w, r)
 		return
 	}
 	id, err := saveUserInformation(token, controllers.ServiceGithub, user)
 	if err != nil {
-		log.Printf("Errored saving user information to database: %s", err)
+		uli.Printf(r, "Errored saving user information to database: %s", err)
 		resp.InternalError(w, r)
 		return
 	}
 	session, err := sess.Store().Get(r, controllers.SessionAuth)
 	if err != nil {
-		log.Printf("Errored getting authentication session @ usersAuth: %s", err)
+		uli.Printf(r, "Errored getting authentication session @ usersAuth: %s", err)
 		resp.InternalError(w, r)
 		return
 	}
@@ -163,7 +163,6 @@ func saveUserInformation(token string, service string, user controllers.User) (i
 	RETURNING (id)
 	`
 	var id int
-	log.Printf("Save user to database: %v", user)
 	err := db.DB().QueryRow(sql, token, user.Username, user.Avatar, user.Name,
 		user.Bio, user.URL, user.Email, user.Location, service).Scan(&id)
 	return id, errors.Wrapf(err, "errored executing request")
