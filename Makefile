@@ -4,7 +4,10 @@
 
 PORT:=5000
 
+VERSION := $(shell git describe --tags)
+
 run: mydevto
+	echo $(VERSION)
 	clear
 	# source secret environment variables (passwords and stuff)
 	export $$(grep -v '\(^$$\|^#\)' .env | xargs)
@@ -12,4 +15,7 @@ run: mydevto
 	./mydevto
 
 mydevto: $(shell find . -type f -name "*.go")
-	go build
+	go build -v -ldflags="-X main.version=$(VERSION)"
+
+version:
+	echo $(VERSION)
