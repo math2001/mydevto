@@ -19,7 +19,9 @@ var logger *log.Logger
 // Init inits the logger
 func Init(version string) {
 	f := createfile(version)
-	logger = log.New(f, "", log.LstdFlags)
+	// writes both to stdout and the file
+	w := io.MultiWriter(os.Stdout, f)
+	logger = log.New(w, "", log.LstdFlags)
 }
 
 // createdirs makes sure all the directory where the logs are going to be
