@@ -1,4 +1,5 @@
 mydevto
-.env
+prod.env
+test.env
 .local
 logs

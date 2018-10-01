@@ -47,12 +47,16 @@ func Init() {
 	if dblogin == "" {
 		log.Fatal("$DBLOGIN must be set")
 	}
+	dbname := os.Getenv("DBNAME")
+	if dbname == "" {
+		log.Fatal("$DBNAME must be set")
+	}
 	cfg := Config{
 		Host:     "localhost",
 		Port:     "5432",
 		User:     dblogin,
-		Password: os.Getenv("DBPASSWORD"),
-		DBName:   "mydevto",
+		Password: os.Getenv("DBPASSWORD"), // password can be empty
+		DBName:   dbname,
 	}
 	if !cfg.valid() {
 		log.Fatal("Invalid configuration to connect to database")
