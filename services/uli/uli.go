@@ -58,8 +58,9 @@ func Printf(r *http.Request, format string, a ...interface{}) {
 // Middleware is the middleware that mux will use
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
 		Printf(r, "Handling")
 		next.ServeHTTP(w, r)
-		Printf(r, "Finished")
+		Printf(r, "Finished after %.2fs", time.Now().Sub(start).Seconds())
 	})
 }

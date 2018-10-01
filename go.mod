@@ -9,5 +9,4 @@ require (
 	github.com/mitchellh/mapstructure v1.0.0
 	github.com/pkg/errors v0.8.0
 	github.com/ulule/loukoum v2.2.0+incompatible
-	golang.org/x/tools v0.0.0-20180928181343-b3c0be4c978b // indirect
 )
