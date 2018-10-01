@@ -16,3 +16,6 @@ run: mydevto
 
 mydevto: $(shell find . -type f -name "*.go")
 	go build -v -ldflags="-X main.version=$(VERSION)"
+
+version:
+	echo $(VERSION)
