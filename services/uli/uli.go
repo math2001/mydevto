@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/math2001/mydevto/version"
+	"github.com/steakknife/devnull"
 )
 
 const logsdir = "./logs"
@@ -19,14 +20,14 @@ const logsdir = "./logs"
 var logger *log.Logger
 
 func init() {
+	if version.Testing {
+		logger = log.New(devnull.Writer, "", log.LstdFlags)
+		return
+	}
 	f := createfile(version.V)
 	// writes both to stdout and the file
 	var w io.Writer
-	if version.Testing {
-		w = f
-	} else {
-		w = io.MultiWriter(os.Stdout, f)
-	}
+	w = io.MultiWriter(os.Stdout, f)
 	logger = log.New(w, "", log.LstdFlags)
 }
 
