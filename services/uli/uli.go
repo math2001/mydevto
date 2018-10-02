@@ -21,7 +21,12 @@ var logger *log.Logger
 func init() {
 	f := createfile(version.V)
 	// writes both to stdout and the file
-	w := io.MultiWriter(os.Stdout, f)
+	var w io.Writer
+	if version.Testing {
+		w = f
+	} else {
+		w = io.MultiWriter(os.Stdout, f)
+	}
 	logger = log.New(w, "", log.LstdFlags)
 }
 
