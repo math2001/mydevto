@@ -114,8 +114,8 @@ func getToken(sessioncode string) (string, error) {
 }
 
 // Gets the user information from a token
-func retrieveUserInformation(token string, service string) (controllers.User, error) {
-	var user controllers.User
+func retrieveUserInformation(token string, service string) (db.User, error) {
+	var user db.User
 	if service == controllers.ServiceGithub {
 		req, err := http.NewRequest("GET", "https://api.github.com/user?access_token="+token, nil)
 		if err != nil {
@@ -154,7 +154,7 @@ func retrieveUserInformation(token string, service string) (controllers.User, er
 
 // Saves the user information into the database, returning the ID of that user,
 // and an error, if any.
-func saveUserInformation(token string, service string, user controllers.User) (int, error) {
+func saveUserInformation(token string, service string, user db.User) (int, error) {
 	sql := `
 	INSERT INTO users (token, username, avatar, name, bio, url, email, location, service)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)

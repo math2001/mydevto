@@ -1,2 +1,5 @@
-- ditch gorilla/sessions. Make my own or look for a decent library
-- make a sql builder (just for fun)
+- [ ] move resp/version into services?
+- [ ] rename version package to build info
+- [ ] fix logs (there all going in there sub directory)
+- [ ] ditch gorilla/sessions. Make my own or look for a decent library
+- [ ] make a sql builder (just for fun)

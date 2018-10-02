@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/math2001/mydevto/controllers"
 	"github.com/math2001/mydevto/resp"
 	"github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/services/uli"
@@ -60,9 +59,9 @@ func list(w http.ResponseWriter, r *http.Request) {
 		resp.InternalError(w, r)
 		return
 	}
-	var posts []controllers.Post
+	var posts []db.Post
 	for rows.Next() {
-		p := controllers.Post{}
+		p := db.Post{}
 		u := &p.User
 		err := rows.Scan(&p.Title, &p.Content, &p.Written, &p.Updated, &u.Name,
 			&u.Username, &u.Avatar, &u.Bio, &u.URL, &u.Email, &u.Location)

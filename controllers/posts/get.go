@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/math2001/mydevto/controllers"
 	"github.com/math2001/mydevto/resp"
 	"github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/services/uli"
@@ -22,7 +21,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 			"Couldn't convert id %q to integer", idstring)
 		return
 	}
-	p := controllers.Post{}
+	p := db.Post{}
 	u := &p.User
 	err = db.DB().QueryRow(`
 	SELECT p.title, p.content, p.written, p.updated,

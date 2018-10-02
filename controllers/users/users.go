@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/math2001/mydevto/controllers"
+	"github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/services/sess"
 	"github.com/math2001/mydevto/services/uli"
 	"github.com/mitchellh/mapstructure"
@@ -23,7 +24,7 @@ func Manage(r *mux.Router) {
 
 // Current returns the current user's information from the sessions. It returns
 // nil if he isn't connected
-func Current(r *http.Request) *controllers.User {
+func Current(r *http.Request) *db.User {
 	session, err := sess.Store().Get(r, controllers.SessionAuth)
 	if _, ok := err.(*os.PathError); ok {
 		// we assume that it's a "file not found"
@@ -40,7 +41,7 @@ func Current(r *http.Request) *controllers.User {
 		// nothing has been found
 		return nil
 	}
-	u := &controllers.User{}
+	u := &db.User{}
 	mapstructure.Decode(session.Values, u)
 	return u
 }

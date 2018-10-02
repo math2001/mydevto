@@ -25,5 +25,5 @@ test:
 
 testdb:
 	export $$(grep -v '\(^$$\|^#\)' test.env | xargs)
-	createdb $$DBNAME || echo "-> Error ignored. Creating schema..."
-	psql -U $$DBLOGIN -d $$DBNAME -f ./bin/schema.pgsql -f ./bin/populate_test.pgsql
+	# createdb $$DBNAME
+	go run cmd/db/maketestdb.go
