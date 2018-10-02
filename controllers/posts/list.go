@@ -1,6 +1,7 @@
 package posts
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -35,7 +36,9 @@ func list(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	b := sibu.Sibu{}
-	b.Add("SELECT p.title, p.content, p.written, p.updated, u.name, u.username, u.avatar, u.bio, u.url, u.email, u.location FROM posts p JOIN users u ON p.userid=u.id")
+	b.Add(`SELECT p.title, p.content, p.written, p.updated, u.name, u.username,
+	u.avatar, u.bio, u.url, u.email, u.location FROM posts p JOIN users u
+	ON p.userid=u.id`)
 	where := sibu.OpClause{}
 	if userid != -1 {
 		where.Add("AND", "p.userid={{ p }}", userid)
@@ -55,6 +58,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 	uli.Printf(r, "Querying @ postIndex: %q %v", sql, args)
 	rows, err := db.DB().Query(sql, args...)
 	if err != nil {
+		fmt.Println("query good", err)
 		uli.Printf(r, "Errored querying @ postIndex: %s", err)
 		resp.InternalError(w, r)
 		return
@@ -72,10 +76,12 @@ func list(w http.ResponseWriter, r *http.Request) {
 		}
 		posts = append(posts, p)
 	}
+	fmt.Println("scan good")
 	if err := rows.Err(); err != nil {
 		uli.Printf(r, "Errored during iteration @ postIndex: %s", err)
 		resp.InternalError(w, r)
 		return
 	}
+	fmt.Println("error good")
 	resp.Encode(w, r, posts)
 }

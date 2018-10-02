@@ -11,18 +11,18 @@ func main() {
 	log.Println("Connecting to the database...")
 	db := db.DB()
 	log.Println("Creating the schema for the database...")
-	db.Exec(`
+	_, err := db.Exec(`
 	CREATE TABLE users (
 		id        SERIAL,
-		token     VARCHAR(255),
+		token     VARCHAR(255) NOT NULL DEFAULT '',
 		service   VARCHAR(1024) NOT NULL,
 		email     VARCHAR(255) NOT NULL,
-		username  VARCHAR(255),
-		avatar    VARCHAR(255),
-		name      VARCHAR(255),
-		bio       VARCHAR(255),
-		url       VARCHAR(255),
-		location  VARCHAR(255),
+		username  VARCHAR(255) NOT NULL,
+		avatar    VARCHAR(255) NOT NULL DEFAULT '',
+		name      VARCHAR(255) NOT NULL DEFAULT '',
+		bio       VARCHAR(255) NOT NULL DEFAULT '',
+		url       VARCHAR(255) NOT NULL DEFAULT '',
+		location  VARCHAR(255) NOT NULL DEFAULT '',
 		updated   TIMESTAMPTZ DEFAULT  now(),
 		PRIMARY KEY (id),
 		UNIQUE (email, service)
@@ -31,8 +31,8 @@ func main() {
 	CREATE TABLE posts (
 		id       SERIAL,
 		userid   INTEGER,
-		title    VARCHAR(255),
-		content  TEXT,
+		title    VARCHAR(255) NOT NULL,
+		content  TEXT NOT NULL,
 		written  TIMESTAMPTZ DEFAULT NOW(),
 		updated  TIMESTAMPTZ DEFAULT NOW(),
 		PRIMARY KEY (id),
@@ -41,15 +41,18 @@ func main() {
 
 	CREATE TABLE comments (
 		id       SERIAL,
-		userid   INTEGER,
-		postid   INTEGER,
-		content  TEXT,
+		userid   INTEGER NOT NULL,
+		postid   INTEGER NOT NULL,
+		content  TEXT NOT NULL,
 		written  TIMESTAMPTZ DEFAULT NOW(),
 		updated  TIMESTAMPTZ DEFAULT NOW(),
 		PRIMARY KEY (id),
 		FOREIGN KEY (postid) REFERENCES posts(id),
 		FOREIGN KEY (userid) REFERENCES users(id)
 	);`)
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Println("Populating the database...")
 	testdb.Populate()
 	log.Println("Done.")
