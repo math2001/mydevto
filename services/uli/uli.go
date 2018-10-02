@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/math2001/mydevto/version"
-	"github.com/steakknife/devnull"
 )
 
 const logsdir = "./logs"
@@ -20,15 +19,19 @@ const logsdir = "./logs"
 var logger *log.Logger
 
 func init() {
+	// TODO: fix up the logs during testing. Please.
 	if version.Testing {
-		logger = log.New(devnull.Writer, "", log.LstdFlags)
+		f, err := os.OpenFile(os.TempDir()+"/mydevto.logs", os.O_APPEND|os.O_WRONLY, 0600)
+		if err != nil {
+			log.Fatalf("uli: couldn't create temporary log file for testing: %s", err)
+		}
+		logger = log.New(f, "", log.LstdFlags)
+		logger.Printf("\n---\n")
 		return
 	}
 	f := createfile(version.V)
 	// writes both to stdout and the file
-	var w io.Writer
-	w = io.MultiWriter(os.Stdout, f)
-	logger = log.New(w, "", log.LstdFlags)
+	logger = log.New(io.MultiWriter(os.Stdout, f), "", log.LstdFlags)
 }
 
 // createdirs makes sure all the directory where the logs are going to be
