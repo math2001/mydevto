@@ -25,5 +25,5 @@ test:
 
 testdb:
 	export $$(grep -v '\(^$$\|^#\)' test.env | xargs)
-	# createdb $$DBNAME
+	createdb $$DBNAME
 	go run cmd/db/maketestdb.go

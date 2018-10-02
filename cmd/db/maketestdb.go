@@ -12,7 +12,7 @@ func main() {
 	db := db.DB()
 	log.Println("Creating the schema for the database...")
 	db.Exec(`
-	CREATE TABLE IF NOT EXISTS users (
+	CREATE TABLE users (
 		id        SERIAL,
 		token     VARCHAR(255),
 		service   VARCHAR(1024) NOT NULL,
@@ -22,12 +22,13 @@ func main() {
 		name      VARCHAR(255),
 		bio       VARCHAR(255),
 		url       VARCHAR(255),
+		location  VARCHAR(255),
 		updated   TIMESTAMPTZ DEFAULT  now(),
 		PRIMARY KEY (id),
 		UNIQUE (email, service)
 	);
 
-	CREATE TABLE IF NOT EXISTS posts (
+	CREATE TABLE posts (
 		id       SERIAL,
 		userid   INTEGER,
 		title    VARCHAR(255),
@@ -38,7 +39,7 @@ func main() {
 		FOREIGN KEY (userid) REFERENCES users(id)
 	);
 
-	CREATE TABLE IF NOT EXISTS comments (
+	CREATE TABLE comments (
 		id       SERIAL,
 		userid   INTEGER,
 		postid   INTEGER,
