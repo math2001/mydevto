@@ -21,7 +21,8 @@ var logger *log.Logger
 func init() {
 	// TODO: fix up the logs during testing. Please.
 	if version.Testing {
-		f, err := os.OpenFile(os.TempDir()+"/mydevto.logs", os.O_APPEND|os.O_WRONLY, 0600)
+		f, err := os.OpenFile(os.TempDir()+"/mydevto.logs",
+			os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 		if err != nil {
 			log.Fatalf("uli: couldn't create temporary log file for testing: %s", err)
 		}
