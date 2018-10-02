@@ -1,4 +1,4 @@
-.PHONY: run version testdb
+.PHONY: run version testdb test
 .SILENT:
 .ONESHELL:
 
@@ -7,7 +7,6 @@ PORT:=5000
 VERSION := $(shell git describe --tags)
 
 run: mydevto
-	echo $(VERSION)
 	clear
 	# source secret environment variables (passwords and stuff)
 	export $$(grep -v '\(^$$\|^#\)' prod.env | xargs)
@@ -15,10 +14,14 @@ run: mydevto
 	./mydevto
 
 mydevto: $(shell find . -type f -name "*.go")
-	go build -v -ldflags="-X main.version=$(VERSION)"
+	go build -ldflags="-X 'github.com/math2001/mydevto/version.V=$(VERSION)'"
 
 version:
 	echo $(VERSION)
+
+test:
+	export $$(grep -v '\(^$$\|^#\)' test.env | xargs)
+	go test -ldflags="-X 'github.com/math2001/mydevto/version.V=$(VERSION)-test'" ./...
 
 testdb:
 	export $$(grep -v '\(^$$\|^#\)' test.env | xargs)

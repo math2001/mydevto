@@ -10,15 +10,16 @@ import (
 	"os"
 	"path"
 	"time"
+
+	"github.com/math2001/mydevto/version"
 )
 
 const logsdir = "./logs"
 
 var logger *log.Logger
 
-// Init inits the logger
-func Init(version string) {
-	f := createfile(version)
+func init() {
+	f := createfile(version.V)
 	// writes both to stdout and the file
 	w := io.MultiWriter(os.Stdout, f)
 	logger = log.New(w, "", log.LstdFlags)

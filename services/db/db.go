@@ -42,6 +42,7 @@ func (cfg Config) valid() bool {
 }
 
 // Init creates a connection to the database with the given configuration
+// It should be called only once
 func Init() {
 	dblogin := os.Getenv("DBLOGIN")
 	if dblogin == "" {
@@ -72,6 +73,10 @@ func Init() {
 	if err := db.Ping(); err != nil {
 		log.Fatalf("Errored pinging database: %s", err)
 	}
+}
+
+func init() {
+	Init()
 }
 
 // DB returns a pointer to the existing connection. Note that it might be nil

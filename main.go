@@ -13,13 +13,12 @@ import (
 	"github.com/math2001/mydevto/controllers"
 	"github.com/math2001/mydevto/controllers/posts"
 	"github.com/math2001/mydevto/controllers/users"
-	"github.com/math2001/mydevto/services/db"
+	"github.com/math2001/mydevto/version"
+
+	// init services
+	_ "github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/services/uli"
 )
-
-// the version is determined at compile time, from the git tags.
-// See Makefile
-var version = "undefined"
 
 var router *mux.Router
 
@@ -50,11 +49,11 @@ func initAPI(r *mux.Router) {
 }
 
 func main() {
+	log.Println("MyDevTo", version.V)
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")
 	}
-
 	router = mux.NewRouter()
 	router.Use(uli.Middleware)
 	router.StrictSlash(true)
@@ -63,8 +62,6 @@ func main() {
 		http.StripPrefix("/static", http.FileServer(http.Dir("web/static"))))
 	initAPI(router.PathPrefix("/api").Subrouter())
 
-	db.Init()
-	uli.Init(version)
 	log.Printf("Running on :%s", port)
 
 	server := &http.Server{
