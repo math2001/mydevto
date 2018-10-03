@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/math2001/mydevto/controllers"
-	"github.com/math2001/mydevto/resp"
 	"github.com/math2001/mydevto/services/db"
+	"github.com/math2001/mydevto/services/resp"
 	"github.com/math2001/mydevto/services/sess"
 	"github.com/math2001/mydevto/services/uli"
 	"github.com/pkg/errors"
