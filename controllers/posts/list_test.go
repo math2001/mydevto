@@ -5,31 +5,23 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/math2001/mydevto/services/db"
+	"github.com/math2001/mydevto/test"
 	"github.com/math2001/mydevto/test/testdb"
 )
 
 func TestListNoFilter(t *testing.T) {
-	req := httptest.NewRequest("GET", "/api/posts/list", nil)
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(list)
-	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Wrong status code: want %d, got %d", http.StatusOK, rr.Code)
-	}
-	if ctype := rr.Header().Get("Content-Type"); ctype != "application/json" {
-		t.Errorf("Wrong Content-Type header: want 'application/json' %q",
-			ctype)
+	rr, err := test.MakeRequest("GET", "/api/posts/list", nil, list)
+	if err != nil {
+		t.Fatal(err)
 	}
 	var actual []db.Post
 	var text bytes.Buffer
 	tee := io.TeeReader(rr.Body, &text)
 	dec := json.NewDecoder(tee)
-	err := dec.Decode(&actual)
+	err = dec.Decode(&actual)
 	if err != nil {
 		t.Errorf("Couldn't decode response body: %s", err)
 		b, err := ioutil.ReadAll(&text)
@@ -48,4 +40,9 @@ func TestListNoFilter(t *testing.T) {
 			t.Errorf("Post didn't match: \n%v\n%v", post, testdb.Posts[i])
 		}
 	}
+}
+
+func TestListLimit(t *testing.T) {
+	// rr, msg := test.MakeRequest("GET", "/api/posts/list", nil, list)
+
 }
