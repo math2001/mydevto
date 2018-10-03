@@ -76,12 +76,10 @@ func list(w http.ResponseWriter, r *http.Request) {
 		}
 		posts = append(posts, p)
 	}
-	fmt.Println("scan good")
 	if err := rows.Err(); err != nil {
 		uli.Printf(r, "Errored during iteration @ postIndex: %s", err)
 		resp.InternalError(w, r)
 		return
 	}
-	fmt.Println("error good")
 	resp.Encode(w, r, posts)
 }
