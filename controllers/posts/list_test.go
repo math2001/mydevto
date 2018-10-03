@@ -1,9 +1,6 @@
 package posts
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
 	"testing"
 
 	"github.com/math2001/mydevto/services/db"
@@ -32,16 +29,19 @@ func TestListNoFilter(t *testing.T) {
 }
 
 func TestListLimit(t *testing.T) {
-	rr, err := test.MakeRequest("GET", "/api/posts/list", nil, list)
+	rr, err := test.MakeRequest("GET", "/api/posts/list?limit=1", nil, list)
 	if err != nil {
 		t.Fatal(err)
 	}
 	var actual []db.Post
-	var response bytes.Buffer
-	tee := io.TeeReader(rr.Body, &response)
-	dec := json.NewDecoder(tee)
-	err = dec.Decode(&actual)
-	if err != nil {
-		t.Errorf("Couldn't decode response body:")
+	if err = test.Decode(rr.Body, &actual); err != nil {
+		t.Fatal(err)
+	}
+	if len(actual) != 1 {
+		t.Errorf("Response length didn't match: got %d, want %d",
+			len(actual), 1)
+	}
+	if !actual[0].Equals(testdb.Posts[0]) {
+		t.Errorf("Post didn't match:\n%v\n%v", actual[0], testdb.Posts[0])
 	}
 }
