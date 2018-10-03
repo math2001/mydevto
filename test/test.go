@@ -1,7 +1,10 @@
 package test
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 
@@ -23,4 +26,20 @@ func MakeRequest(method, target string, body io.Reader,
 			"application/json", ctype)
 	}
 	return rr, nil
+}
+
+// Decode decodes a JSON response into to and returns any error that occurs
+func Decode(r io.Reader, to interface{}) error {
+	var text bytes.Buffer
+	tee := io.TeeReader(r, &text)
+	dec := json.NewDecoder(tee)
+	err := dec.Decode(&to)
+	if err != nil {
+		body, err := ioutil.ReadAll(&text)
+		if err != nil {
+			return errors.Wrapf(err, "Couldn't readel duplicated response body")
+		}
+		return errors.Wrapf(err, "Couldn't decode response body in %q", body)
+	}
+	return nil
 }

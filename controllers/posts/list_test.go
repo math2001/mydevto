@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"testing"
 
 	"github.com/math2001/mydevto/services/db"
@@ -18,18 +17,8 @@ func TestListNoFilter(t *testing.T) {
 		t.Fatal(err)
 	}
 	var actual []db.Post
-	var text bytes.Buffer
-	tee := io.TeeReader(rr.Body, &text)
-	dec := json.NewDecoder(tee)
-	err = dec.Decode(&actual)
-	if err != nil {
-		t.Errorf("Couldn't decode response body: %s", err)
-		b, err := ioutil.ReadAll(&text)
-		if err != nil {
-			t.Errorf("Couldn't read from duplicated body: %s", err)
-		}
-		t.Logf("Body: %q", string(b))
-		t.Fatal()
+	if err = test.Decode(rr.Body, &actual); err != nil {
+		t.Fatal(err)
 	}
 	if len(testdb.Posts) != len(actual) {
 		t.Fatalf("Response length didn't match: want %d, got %d",
@@ -43,6 +32,16 @@ func TestListNoFilter(t *testing.T) {
 }
 
 func TestListLimit(t *testing.T) {
-	// rr, msg := test.MakeRequest("GET", "/api/posts/list", nil, list)
-
+	rr, err := test.MakeRequest("GET", "/api/posts/list", nil, list)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var actual []db.Post
+	var response bytes.Buffer
+	tee := io.TeeReader(rr.Body, &response)
+	dec := json.NewDecoder(tee)
+	err = dec.Decode(&actual)
+	if err != nil {
+		t.Errorf("Couldn't decode response body:")
+	}
 }
