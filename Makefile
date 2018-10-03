@@ -14,14 +14,14 @@ run: mydevto
 	./mydevto
 
 mydevto: $(shell find . -type f -name "*.go")
-	go build -ldflags="-X 'github.com/math2001/mydevto/version.V=$(VERSION)'"
+	go build -ldflags="-X 'github.com/math2001/mydevto/services/buildinfos.V=$(VERSION)'"
 
 version:
 	echo $(VERSION)
 
 test:
 	export $$(grep -v '\(^$$\|^#\)' test.env | xargs)
-	go test -ldflags="-X 'github.com/math2001/mydevto/version.V=$(VERSION)-test'" ./...
+	go test -ldflags="-X 'github.com/math2001/mydevto/services/buildinfos.V=$(VERSION)-test'" ./...
 
 testdb:
 	export $$(grep -v '\(^$$\|^#\)' test.env | xargs)

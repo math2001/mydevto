@@ -1,4 +1,4 @@
-package version
+package buildinfos
 
 import (
 	"log"
@@ -21,6 +21,8 @@ var Patch int
 // Testing is true if this is the testing version
 var Testing bool
 
+// we can affort to Fatal because this is done as soon as the program is run,
+// not during the first request
 func parseversion(v string) (major, minor, patch int, testing bool) {
 	// remove the leading 'v'
 	str := V[1:]

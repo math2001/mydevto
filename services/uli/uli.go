@@ -11,7 +11,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/math2001/mydevto/version"
+	"github.com/math2001/mydevto/services/buildinfos"
 )
 
 const logsdir = "./logs"
@@ -20,7 +20,7 @@ var logger *log.Logger
 
 func init() {
 	// TODO: fix up the logs during testing. Please.
-	if version.Testing {
+	if buildinfos.Testing {
 		f, err := os.OpenFile(os.TempDir()+"/mydevto.logs",
 			os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 		if err != nil {
@@ -30,7 +30,7 @@ func init() {
 		logger.Printf("\n---\n")
 		return
 	}
-	f := createfile(version.V)
+	f := createfile(buildinfos.V)
 	// writes both to stdout and the file
 	logger = log.New(io.MultiWriter(os.Stdout, f), "", log.LstdFlags)
 }

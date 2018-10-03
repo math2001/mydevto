@@ -13,9 +13,9 @@ import (
 	"github.com/math2001/mydevto/controllers"
 	"github.com/math2001/mydevto/controllers/posts"
 	"github.com/math2001/mydevto/controllers/users"
-	"github.com/math2001/mydevto/version"
 
 	// init services
+	"github.com/math2001/mydevto/services/buildinfos"
 	_ "github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/services/uli"
 )
@@ -49,7 +49,7 @@ func initAPI(r *mux.Router) {
 }
 
 func main() {
-	log.Println("MyDevTo", version.V)
+	log.Println("MyDevTo", buildinfos.V)
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")

@@ -3,4 +3,4 @@
 - [ ] fix logs (there all going in there sub directory)
 - [ ] ditch gorilla/sessions. Make my own or look for a decent library
 - [ ] make a sql builder (just for fun)
-- [ ] investigate http.NewRequest with the .RequestURI thing
+- [x] investigate http.NewRequest with the .RequestURI thing
