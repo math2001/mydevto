@@ -45,3 +45,23 @@ func TestListLimit(t *testing.T) {
 		t.Errorf("Post didn't match:\n%v\n%v", actual[0], testdb.Posts[0])
 	}
 }
+
+func TestListUserid(t *testing.T) {
+	rr, err := test.MakeRequest("GET", "/api/posts/list?userid=1", nil, list)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var actual []db.Post
+	if err = test.Decode(rr.Body, &actual); err != nil {
+		t.Fatal(err)
+	}
+	if len(actual) != 2 {
+		t.Errorf("Response length didn't match: got %d, want %d",
+			len(actual), 2)
+	}
+	for i, post := range actual {
+		if !post.Equals(testdb.Posts[i]) {
+			t.Errorf("Post didn't match: \n%v\n%v", post, testdb.Posts[i])
+		}
+	}
+}
