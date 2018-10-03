@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/services/resp"
 	"github.com/math2001/mydevto/services/uli"
@@ -13,7 +12,12 @@ import (
 
 // get gets a post by id
 func get(w http.ResponseWriter, r *http.Request) {
-	idstring := mux.Vars(r)["id"]
+	idstring := r.URL.Query().Get("id")
+	if idstring == "" {
+		uli.Printf(r, "Given an empty idstring")
+		resp.Error(w, r, http.StatusBadRequest, "Invalid id. Empty strings not allowed")
+		return
+	}
 	id, err := strconv.Atoi(idstring)
 	if err != nil {
 		uli.Printf(r, "Couldn't convert id %q to integer: %s", idstring, err)
@@ -34,7 +38,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 		&u.Bio, &u.URL, &u.Avatar, &u.Name)
 
 	if err == sql.ErrNoRows {
-		uli.Printf(r, "Couldn't find post with id %d", id)
+		uli.Printf(r, "No post found with id %d", id)
 		resp.Error(w, r, http.StatusBadRequest, "No post found with id %d", id)
 	} else if err != nil {
 		uli.Printf(r, "Errored querying post from id %d: %s", id, err)
