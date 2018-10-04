@@ -13,5 +13,5 @@ func current(w http.ResponseWriter, r *http.Request) {
 		resp.Error(w, r, http.StatusForbidden, "please log in")
 		return
 	}
-	resp.Encode(w, r, u)
+	resp.Encode(w, r, u, http.StatusOK)
 }

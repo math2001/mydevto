@@ -44,6 +44,6 @@ func get(w http.ResponseWriter, r *http.Request) {
 		uli.Printf(r, "Errored querying post from id %d: %s", id, err)
 		resp.InternalError(w, r)
 	} else {
-		resp.Encode(w, r, p)
+		resp.Encode(w, r, p, http.StatusOK)
 	}
 }

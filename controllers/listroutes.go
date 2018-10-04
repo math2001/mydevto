@@ -40,5 +40,5 @@ func (lr ListRoutes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		resp.InternalError(w, r)
 		return
 	}
-	resp.Encode(w, r, routes)
+	resp.Encode(w, r, routes, http.StatusOK)
 }

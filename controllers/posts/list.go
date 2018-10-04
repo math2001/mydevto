@@ -81,5 +81,5 @@ func list(w http.ResponseWriter, r *http.Request) {
 		resp.InternalError(w, r)
 		return
 	}
-	resp.Encode(w, r, posts)
+	resp.Encode(w, r, posts, http.StatusOK)
 }

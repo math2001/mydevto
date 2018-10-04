@@ -11,11 +11,10 @@ import (
 // Message writes a response in the form { "type": <str>, "message": <str> }
 // It is mainly a util function for the Error and Success functions
 func Message(w http.ResponseWriter, r *http.Request, code int, kind string, format string, a ...interface{}) {
-	w.WriteHeader(code)
 	Encode(w, r, map[string]string{
 		"type":    kind,
 		"message": fmt.Sprintf(format, a...),
-	})
+	}, code)
 }
 
 // Error writes a message of type "error" with "message" msg. It is typically
@@ -40,8 +39,9 @@ func InternalError(w http.ResponseWriter, r *http.Request) {
 }
 
 // Encode writes the object to the page, formatting according the User-Agent
-func Encode(w http.ResponseWriter, r *http.Request, e interface{}) {
+func Encode(w http.ResponseWriter, r *http.Request, e interface{}, code int) {
 	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(code)
 	enc := json.NewEncoder(w)
 	if r.UserAgent() != "js" {
 		enc.SetIndent("", "  ")

@@ -35,8 +35,8 @@ func MakeRequest(method, target string, body io.Reader,
 			statuscode, readbody(rr.Body))
 	}
 	if ctype := rr.Header().Get("Content-Type"); ctype != "application/json" {
-		return nil, errors.Errorf("Wrong Content-Type header:got %s, want %s\n%s",
-			"application/json", ctype, readbody(rr.Body))
+		return nil, errors.Errorf("Wrong Content-Type header: got %q, want %q\n%s",
+			ctype, "application/json", readbody(rr.Body))
 	}
 	return rr, nil
 }
