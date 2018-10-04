@@ -6,6 +6,8 @@ PORT:=5000
 
 VERSION := $(shell git describe --tags)
 
+LDFLAGS := -ldflags="-X 'github.com/math2001/mydevto/services/buildinfos.V=$(VERSION)'"
+
 run: mydevto
 	clear
 	# source secret environment variables (passwords and stuff)
@@ -14,14 +16,14 @@ run: mydevto
 	./mydevto
 
 mydevto: $(shell find . -type f -name "*.go")
-	go build -ldflags="-X 'github.com/math2001/mydevto/services/buildinfos.V=$(VERSION)'"
+	go build $(LDFLAGS)
 
 version:
 	echo $(VERSION)
 
 test:
 	export $$(grep -v '\(^$$\|^#\)' test.env | xargs)
-	go test -ldflags="-X 'github.com/math2001/mydevto/services/buildinfos.V=$(VERSION)-test'" ./...
+	go test $(LDFLAGS) ./...
 
 testdb:
 	export $$(grep -v '\(^$$\|^#\)' test.env | xargs)
