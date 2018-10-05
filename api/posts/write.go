@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/math2001/mydevto/controllers/users"
+	"github.com/math2001/mydevto/api/users"
 	"github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/services/resp"
 	"github.com/math2001/mydevto/services/uli"

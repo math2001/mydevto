@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/math2001/mydevto/controllers"
-	"github.com/math2001/mydevto/controllers/posts"
-	"github.com/math2001/mydevto/controllers/users"
+	"github.com/math2001/mydevto/api"
+	"github.com/math2001/mydevto/api/posts"
+	"github.com/math2001/mydevto/api/users"
 
 	// init services
 	"github.com/math2001/mydevto/services/buildinfos"
@@ -43,7 +43,7 @@ func index() http.HandlerFunc {
 }
 
 func initAPI(r *mux.Router) {
-	r.Handle("/", controllers.ListRoutes{Router: r}).Methods("GET")
+	r.Handle("/", api.ListRoutes{Router: r}).Methods("GET")
 	posts.Manage(r.PathPrefix("/posts/").Subrouter())
 	users.Manage(r.PathPrefix("/users/").Subrouter())
 }

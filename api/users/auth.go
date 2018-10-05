@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/math2001/mydevto/controllers"
+	"github.com/math2001/mydevto/api"
 	"github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/services/resp"
 	"github.com/math2001/mydevto/services/sess"
@@ -38,19 +38,19 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		resp.InternalError(w, r)
 		return
 	}
-	user, err := retrieveUserInformation(token, controllers.ServiceGithub)
+	user, err := retrieveUserInformation(token, api.ServiceGithub)
 	if err != nil {
 		uli.Printf(r, "Errored retrieving user information from token: %s", err)
 		resp.InternalError(w, r)
 		return
 	}
-	id, err := saveUserInformation(token, controllers.ServiceGithub, user)
+	id, err := saveUserInformation(token, api.ServiceGithub, user)
 	if err != nil {
 		uli.Printf(r, "Errored saving user information to database: %s", err)
 		resp.InternalError(w, r)
 		return
 	}
-	session, err := sess.Store().Get(r, controllers.SessionAuth)
+	session, err := sess.Store().Get(r, api.SessionAuth)
 	if err != nil {
 		uli.Printf(r, "Errored getting authentication session @ usersAuth: %s", err)
 		resp.InternalError(w, r)
@@ -91,7 +91,7 @@ func getToken(sessioncode string) (string, error) {
 		return "", errors.Wrapf(err, "errored building request getting token")
 	}
 	req.Header.Add("Accept", "application/json")
-	res, err := controllers.HTTPClient.Do(req)
+	res, err := api.HTTPClient.Do(req)
 	if err != nil {
 		return "", errors.Wrapf(err, "errored doing request getting token")
 	}
@@ -116,13 +116,13 @@ func getToken(sessioncode string) (string, error) {
 // Gets the user information from a token
 func retrieveUserInformation(token string, service string) (db.User, error) {
 	var user db.User
-	if service == controllers.ServiceGithub {
+	if service == api.ServiceGithub {
 		req, err := http.NewRequest("GET", "https://api.github.com/user?access_token="+token, nil)
 		if err != nil {
 			return user, errors.Wrapf(err, "errored creating request")
 		}
 		req.Header.Add("Accept", "application/json")
-		res, err := controllers.HTTPClient.Do(req)
+		res, err := api.HTTPClient.Do(req)
 		if err != nil {
 			return user, errors.Wrapf(err, "errored doing request")
 		}
