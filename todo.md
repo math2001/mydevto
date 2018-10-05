@@ -1,4 +1,5 @@
 - [ ] fix logs (there all going in there sub directory)
+- [ ] make custom router
 - [ ] ditch gorilla/sessions. Make my own or look for a decent library
 - [ ] make a sql builder (just for fun)
 - [x] investigate http.NewRequest with the .RequestURI thing
