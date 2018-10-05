@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/math2001/mydevto/services/uli"
 )
 
 // Message writes a response in the form { "type": <str>, "message": <str> }
@@ -28,6 +30,13 @@ func Error(w http.ResponseWriter, r *http.Request, code int, format string, a ..
 // typically used to confirm that a post request has been successful
 func Success(w http.ResponseWriter, r *http.Request, format string, a ...interface{}) {
 	Message(w, r, http.StatusOK, "success", format, a...)
+}
+
+// RequestLogin is similar to InternalErro. It just writes that the user should
+// login before trying to access this part of the website
+func RequestLogin(w http.ResponseWriter, r *http.Request) {
+	uli.Printf(r, "%s tried to claim access", r.RemoteAddr)
+	Error(w, r, http.StatusForbidden, "please log in")
 }
 
 // InternalError writes a static object:

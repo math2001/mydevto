@@ -66,6 +66,12 @@ func Printf(r *http.Request, format string, a ...interface{}) {
 	logger.Printf("%s %s %s", r.RemoteAddr, r.RequestURI, fmt.Sprintf(format, a...))
 }
 
+// Security display a warning header indicating that the next log is could be
+// about a security flaw
+func Security(r *http.Request) {
+	Printf(r, "POTENTIAL SECURITY FLAW")
+}
+
 // Middleware is the middleware that mux will use
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
