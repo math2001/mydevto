@@ -1,16 +1,28 @@
-package posts
+package posts_test
 
 import (
 	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
 
+	"github.com/math2001/mydevto/router"
 	"github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/test"
 	"github.com/math2001/mydevto/test/testdb"
 )
 
+var server *httptest.Server
+
+func TestMain(t *testing.M) {
+	server = httptest.NewServer(router.Router())
+	code := t.Run()
+	server.Close()
+	os.Exit(code)
+}
+
 func TestListNoFilter(t *testing.T) {
-	rr, err := test.MakeRequest("GET", "/api/posts/list", nil, list,
+	rr, err := test.MakeRequest(server, "GET", "/api/posts/list", nil,
 		http.StatusOK)
 	if err != nil {
 		t.Fatal(err)
@@ -31,7 +43,7 @@ func TestListNoFilter(t *testing.T) {
 }
 
 func TestListLimit(t *testing.T) {
-	rr, err := test.MakeRequest("GET", "/api/posts/list?limit=1", nil, list,
+	rr, err := test.MakeRequest(server, "GET", "/api/posts/list?limit=1", nil,
 		http.StatusOK)
 	if err != nil {
 		t.Fatal(err)
@@ -50,7 +62,7 @@ func TestListLimit(t *testing.T) {
 }
 
 func TestListUserid(t *testing.T) {
-	rr, err := test.MakeRequest("GET", "/api/posts/list?userid=1", nil, list,
+	rr, err := test.MakeRequest(server, "GET", "/api/posts/list?userid=1", nil,
 		http.StatusOK)
 	if err != nil {
 		t.Fatal(err)
@@ -71,8 +83,8 @@ func TestListUserid(t *testing.T) {
 }
 
 func TestListLimitUserid(t *testing.T) {
-	rr, err := test.MakeRequest("GET", "/api/posts/list?userid=1&limit=1", nil, list,
-		http.StatusOK)
+	rr, err := test.MakeRequest(server, "GET", "/api/posts/list?userid=1&limit=1",
+		nil, http.StatusOK)
 	if err != nil {
 		t.Fatal(err)
 	}

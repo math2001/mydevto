@@ -23,18 +23,23 @@ func readbody(r io.Reader) string {
 }
 
 // MakeRequest makes a request to a handler and returns the recorded response
-func MakeRequest(method, target string, body io.Reader,
-	handler http.HandlerFunc, statuscode int) (*httptest.ResponseRecorder, error) {
+func MakeRequest(server *httptest.Server, method, target string, body io.Reader,
+	statuscode int) (*http.Response, error) {
 
-	req := httptest.NewRequest(method, target, body)
-	rr := httptest.NewRecorder()
-	http.HandlerFunc(handler).ServeHTTP(rr, req)
-
-	if status := rr.Code; status != statuscode {
-		return nil, errors.Errorf("Wrong status code: got %d, want %d\n%q", rr.Code,
-			statuscode, readbody(rr.Body))
+	req, err := http.NewRequest(method, server.URL+target, body)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not make request")
 	}
-	if ctype := rr.Header().Get("Content-Type"); ctype != "application/json" {
+	rr, err := server.Client().Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not do request")
+	}
+
+	if status := rr.StatusCode; status != statuscode {
+		return nil, errors.Errorf("Wrong status code: got %d, want %d\n%q",
+			rr.StatusCode, statuscode, readbody(rr.Body))
+	}
+	if ctype := rr.Header.Get("Content-Type"); ctype != "application/json" {
 		return nil, errors.Errorf("Wrong Content-Type header: got %q, want %q\n%s",
 			ctype, "application/json", readbody(rr.Body))
 	}

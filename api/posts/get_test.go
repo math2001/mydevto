@@ -1,4 +1,4 @@
-package posts
+package posts_test
 
 import (
 	"reflect"
@@ -22,7 +22,7 @@ func TestGetValid(t *testing.T) {
 	for _, tc := range tt {
 		tc := tc // capture range variable
 		t.Run(tc.name, func(t *testing.T) {
-			rr, err := test.MakeRequest("GET", tc.uri, nil, get, tc.statuscode)
+			rr, err := test.MakeRequest(server, "GET", tc.uri, nil, tc.statuscode)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -69,7 +69,7 @@ func TestGetError(t *testing.T) {
 	for _, tc := range tt {
 		tc := tc // capture range variable
 		t.Run(tc.name, func(t *testing.T) {
-			rr, err := test.MakeRequest("GET", tc.uri, nil, get, tc.statuscode)
+			rr, err := test.MakeRequest(server, "GET", tc.uri, nil, tc.statuscode)
 			if err != nil {
 				t.Fatal(err)
 			}

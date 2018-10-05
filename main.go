@@ -9,18 +9,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/math2001/mydevto/api"
-	"github.com/math2001/mydevto/api/posts"
-	"github.com/math2001/mydevto/api/users"
+	"github.com/math2001/mydevto/router"
 
 	// init services
 	"github.com/math2001/mydevto/services/buildinfos"
 	_ "github.com/math2001/mydevto/services/db"
-	"github.com/math2001/mydevto/services/uli"
 )
-
-var router *mux.Router
 
 // This is the homepage, the only page the user is going to load directly
 func index() http.HandlerFunc {
@@ -42,30 +36,17 @@ func index() http.HandlerFunc {
 	}
 }
 
-func initAPI(r *mux.Router) {
-	r.Handle("/", api.ListRoutes{Router: r}).Methods("GET")
-	posts.Manage(r.PathPrefix("/posts/").Subrouter())
-	users.Manage(r.PathPrefix("/users/").Subrouter())
-}
-
 func main() {
 	log.Println("MyDevTo", buildinfos.V)
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")
 	}
-	router = mux.NewRouter()
-	router.Use(uli.Middleware)
-	router.StrictSlash(true)
-	router.HandleFunc("/", index())
-	router.PathPrefix("/static").Handler(
-		http.StripPrefix("/static", http.FileServer(http.Dir("web/static"))))
-	initAPI(router.PathPrefix("/api").Subrouter())
 
 	log.Printf("Running on :%s", port)
 
 	server := &http.Server{
-		Handler:      router,
+		Handler:      router.Router(),
 		Addr:         ":" + port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
