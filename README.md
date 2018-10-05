@@ -49,6 +49,25 @@ will perform much better that a clunky one, that's known. Therefore, this is wha
 I'm trying to figure out (and why the commit rate is so slow): the right
 structure.
 
+### Timeline
+
+```
+|<- request
+|
+|- get required components from tetsu.json
+|
+|-> send them off to NodeJS
+|   use the /api to render stuff
+|<- get the HTML back
+|
+|-> send the html to the client
+|   First paint, DOMContentLoaded
+|-> push to the client the components they are going to need
+|   (based on the link there are on the page)
+
+TODO: user interaction (shouldn't be to hard)
+```
+
 Here's the file structure I've decided to adopt for now.
 
 #### `/`
