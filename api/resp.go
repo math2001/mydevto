@@ -1,5 +1,6 @@
-// Package resp provides basic functions to write message as an http response
-package resp
+package api
+
+// provides basic functions to write JSON as an http response
 
 import (
 	"encoding/json"

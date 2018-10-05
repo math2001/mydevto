@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/math2001/mydevto/api"
 	"github.com/math2001/mydevto/services/db"
-	"github.com/math2001/mydevto/services/resp"
 	"github.com/math2001/mydevto/services/uli"
 )
 
@@ -15,13 +15,13 @@ func get(w http.ResponseWriter, r *http.Request) {
 	idstring := r.URL.Query().Get("id")
 	if idstring == "" {
 		uli.Printf(r, "Given an empty idstring")
-		resp.Error(w, r, http.StatusBadRequest, "Invalid id. Empty strings not allowed")
+		api.Error(w, r, http.StatusBadRequest, "Invalid id. Empty strings not allowed")
 		return
 	}
 	id, err := strconv.Atoi(idstring)
 	if err != nil {
 		uli.Printf(r, "Couldn't convert id %q to integer: %s", idstring, err)
-		resp.Error(w, r, http.StatusBadRequest,
+		api.Error(w, r, http.StatusBadRequest,
 			"Couldn't convert id %q to integer", idstring)
 		return
 	}
@@ -39,11 +39,11 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 	if err == sql.ErrNoRows {
 		uli.Printf(r, "No post found with id %d", id)
-		resp.Error(w, r, http.StatusBadRequest, "No post found with id %d", id)
+		api.Error(w, r, http.StatusBadRequest, "No post found with id %d", id)
 	} else if err != nil {
 		uli.Printf(r, "Errored querying post from id %d: %s", id, err)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 	} else {
-		resp.Encode(w, r, p, http.StatusOK)
+		api.Encode(w, r, p, http.StatusOK)
 	}
 }

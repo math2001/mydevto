@@ -10,7 +10,6 @@ import (
 
 	"github.com/math2001/mydevto/api"
 	"github.com/math2001/mydevto/services/db"
-	"github.com/math2001/mydevto/services/resp"
 	"github.com/math2001/mydevto/services/sess"
 	"github.com/math2001/mydevto/services/uli"
 	"github.com/pkg/errors"
@@ -23,37 +22,37 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	service := query.Get("service")
 	if service != "github" {
 		uli.Printf(r, "Invalid service %q trying to authenticate @ usersAuth", service)
-		resp.Error(w, r, http.StatusBadRequest, "Invalid service")
+		api.Error(w, r, http.StatusBadRequest, "Invalid service")
 		return
 	}
 	sessioncode := query.Get("code")
 	if sessioncode == "" {
 		uli.Printf(r, "No session code in URL parameter @ usersAuth#%q", service)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	}
 	token, err := getToken(sessioncode)
 	if err != nil {
 		uli.Printf(r, "Errored getting token: %s", err)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	}
 	user, err := retrieveUserInformation(token, api.ServiceGithub)
 	if err != nil {
 		uli.Printf(r, "Errored retrieving user information from token: %s", err)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	}
 	id, err := saveUserInformation(token, api.ServiceGithub, user)
 	if err != nil {
 		uli.Printf(r, "Errored saving user information to database: %s", err)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	}
 	session, err := sess.Store().Get(r, api.SessionAuth)
 	if err != nil {
 		uli.Printf(r, "Errored getting authentication session @ usersAuth: %s", err)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	}
 	session.Values["id"] = id

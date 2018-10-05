@@ -5,29 +5,29 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/math2001/mydevto/api"
 	"github.com/math2001/mydevto/api/users"
 	"github.com/math2001/mydevto/services/db"
-	"github.com/math2001/mydevto/services/resp"
 	"github.com/math2001/mydevto/services/uli"
 )
 
 const maxTitleLength = 255
 
 func invaliddata(w http.ResponseWriter, r *http.Request) {
-	resp.Error(w, r, http.StatusBadRequest, "Invalid request form data")
+	api.Error(w, r, http.StatusBadRequest, "Invalid request form data")
 }
 
 // write creates or updates a posts, depending on whether id is given
 func write(w http.ResponseWriter, r *http.Request) {
 	user := users.Current(r)
 	if user == nil {
-		resp.RequestLogin(w, r)
+		api.RequestLogin(w, r)
 		return
 	}
 	userid := user.ID
 	if err := r.ParseForm(); err != nil {
 		uli.Printf(r, "Could not parse form data: %s", err)
-		resp.Error(w, r, http.StatusBadRequest,
+		api.Error(w, r, http.StatusBadRequest,
 			"Could not parse form data: %s", err)
 		return
 	}
@@ -80,10 +80,10 @@ func write(w http.ResponseWriter, r *http.Request) {
 			// it'll be very helpful when this error occurs
 			uli.Printf(r, "userid: %d title: %q content: %q", userid, title,
 				content)
-			resp.InternalError(w, r)
+			api.InternalError(w, r)
 			return
 		}
-		resp.Encode(w, r, map[string]interface{}{
+		api.Encode(w, r, map[string]interface{}{
 			"type":    "success",
 			"message": "post successfully inserted",
 			"id":      newid,
@@ -98,11 +98,11 @@ func write(w http.ResponseWriter, r *http.Request) {
 	if err == sql.ErrNoRows {
 		uli.Security(r)
 		uli.Printf(r, "invalid combination postid (%d) and userid (%d)", id, userid)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	} else if err != nil {
 		uli.Printf(r, "could not update post: %s", err)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	}
 	// newid should be the same as id. I implement this behaviour because I'm
@@ -112,8 +112,8 @@ func write(w http.ResponseWriter, r *http.Request) {
 		uli.Security(r)
 		uli.Printf(r, "post id (%d) is different from the returned id (%d)",
 			id, newid)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	}
-	resp.Success(w, r, "post updated successfully")
+	api.Success(w, r, "post updated successfully")
 }

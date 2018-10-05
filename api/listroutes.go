@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/math2001/mydevto/services/resp"
 	"github.com/math2001/mydevto/services/uli"
 )
 
@@ -37,8 +36,8 @@ func (lr ListRoutes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		uli.Printf(r, "Errored walking routes: %s", err)
-		resp.InternalError(w, r)
+		InternalError(w, r)
 		return
 	}
-	resp.Encode(w, r, routes, http.StatusOK)
+	Encode(w, r, routes, http.StatusOK)
 }

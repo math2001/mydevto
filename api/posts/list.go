@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/math2001/mydevto/api"
 	"github.com/math2001/mydevto/services/db"
-	"github.com/math2001/mydevto/services/resp"
 	"github.com/math2001/mydevto/services/uli"
 	"github.com/math2001/sibu"
 )
@@ -22,7 +22,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 		limit, err = strconv.Atoi(lim)
 		if err != nil {
 			uli.Printf(r, "Invalid limit @ postsGet: %s", err)
-			resp.Error(w, r, http.StatusBadRequest,
+			api.Error(w, r, http.StatusBadRequest,
 				"Invalid `limit`. Should be a number")
 			return
 		}
@@ -31,7 +31,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 		userid, err = strconv.Atoi(ui)
 		if err != nil {
 			uli.Printf(r, "Invalid userid @ postsGet: %s", err)
-			resp.Error(w, r, http.StatusBadRequest, "Invalid `userid`. Should be a number")
+			api.Error(w, r, http.StatusBadRequest, "Invalid `userid`. Should be a number")
 			return
 		}
 	}
@@ -52,7 +52,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 	sql, args, err := b.Query()
 	if err != nil {
 		uli.Printf(r, "Errored building sql request @ postIndex: %s", err)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	}
 	uli.Printf(r, "Querying @ postIndex: %q %v", sql, args)
@@ -60,7 +60,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("query good", err)
 		uli.Printf(r, "Errored querying @ postIndex: %s", err)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	}
 	var posts []db.Post
@@ -71,15 +71,15 @@ func list(w http.ResponseWriter, r *http.Request) {
 			&u.Username, &u.Avatar, &u.Bio, &u.URL, &u.Email, &u.Location)
 		if err != nil {
 			uli.Printf(r, "Errored scanning rows @ postIndex: %s", err)
-			resp.InternalError(w, r)
+			api.InternalError(w, r)
 			return
 		}
 		posts = append(posts, p)
 	}
 	if err := rows.Err(); err != nil {
 		uli.Printf(r, "Errored during iteration @ postIndex: %s", err)
-		resp.InternalError(w, r)
+		api.InternalError(w, r)
 		return
 	}
-	resp.Encode(w, r, posts, http.StatusOK)
+	api.Encode(w, r, posts, http.StatusOK)
 }
