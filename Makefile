@@ -6,7 +6,7 @@ PORT:=5000
 
 VERSION := $(shell git describe --tags)
 
-LDFLAGS := -ldflags="-X 'github.com/math2001/mydevto/services/buildinfos.V=$(VERSION)'"
+LDFLAGS := -ldflags="-X 'github.com/math2001/mydevto/services/buildinfos.V=$(VERSION)$$VERSION_EXTRA'"
 
 run: mydevto
 	clear
@@ -23,6 +23,7 @@ version:
 
 test:
 	export $$(grep -v '\(^$$\|^#\)' test.env | xargs)
+	export VERSION_EXTRA='-testing'
 	go test $(LDFLAGS) ./...
 
 testdb:
