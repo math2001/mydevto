@@ -2,6 +2,7 @@ package buildinfos
 
 import (
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -48,5 +49,11 @@ func parseversion(v string) (major, minor, patch int, testing bool) {
 }
 
 func init() {
+	if V == "" {
+		log.Print("No build information. Use make to build")
+		log.Print("$ go clean")
+		log.Print("$ make")
+		os.Exit(1)
+	}
 	Major, Minor, Patch, Testing = parseversion(V)
 }
