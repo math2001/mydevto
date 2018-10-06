@@ -1,4 +1,6 @@
 - [ ] fix logs (there all going in there sub directory)
+- [ ] fix logs order
+- [ ] do separate test suite to only test from user perspective
 - [ ] move server creation to eponymous test file
 - [ ] allow to change user during tests
 - [ ] fix uli during testing

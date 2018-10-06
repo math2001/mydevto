@@ -16,6 +16,8 @@ import (
 	"github.com/math2001/mydevto/test/testdb"
 )
 
+// this is bad... Tests aren't indenpendent...
+
 func TestInsert(t *testing.T) {
 	insert := time.Now()
 	post := db.Post{
@@ -117,10 +119,13 @@ func TestWriteUpdate(t *testing.T) {
 	}
 
 	// clean up the post
-	_, err = db.DB().Exec(`UPDATE SET
+	_, err = db.DB().Exec(`UPDATE posts SET
 	userid=$1, title=$2, content=$3, updated=$4, written=$5
 	WHERE id=$6`, post.User.ID, post.Title, post.Content, post.Updated,
-		post.Written, post.ID)
+		post.Written, id)
+	if err != nil {
+		log.Fatalf("could not clean up post: %s", err)
+	}
 }
 
 func TestWriteErrors(t *testing.T) {
