@@ -36,7 +36,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	b := sibu.Sibu{}
-	b.Add(`SELECT p.title, p.content, p.written, p.updated, u.name, u.username,
+	b.Add(`SELECT p.id, p.title, p.content, p.written, p.updated, u.name, u.username,
 	u.avatar, u.bio, u.url, u.email, u.location FROM posts p JOIN users u
 	ON p.userid=u.id`)
 	where := sibu.OpClause{}
@@ -67,7 +67,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		p := db.Post{}
 		u := &p.User
-		err := rows.Scan(&p.Title, &p.Content, &p.Written, &p.Updated, &u.Name,
+		err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.Written, &p.Updated, &u.Name,
 			&u.Username, &u.Avatar, &u.Bio, &u.URL, &u.Email, &u.Location)
 		if err != nil {
 			uli.Printf(r, "Errored scanning rows @ postIndex: %s", err)

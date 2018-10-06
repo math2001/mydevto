@@ -35,9 +35,19 @@ func TestListNoFilter(t *testing.T) {
 		t.Fatalf("Response length didn't match: want %d, got %d",
 			len(testdb.Posts), len(actual))
 	}
-	for i, post := range actual {
-		if !post.Equals(testdb.Posts[i]) {
-			t.Errorf("Post didn't match: \n%v\n%v", post, testdb.Posts[i])
+	var found bool
+	for _, post := range actual {
+		found = false
+		for _, p := range testdb.Posts {
+			if p.ID == post.ID {
+				found = true
+				if !post.Equals(p) {
+					t.Errorf("Post didn't match: \n%v\n%v", post, p)
+				}
+			}
+		}
+		if found == false {
+			t.Fatalf("could not find post id %d in result", post.ID)
 		}
 	}
 }
@@ -56,8 +66,13 @@ func TestListLimit(t *testing.T) {
 		t.Errorf("Response length didn't match: got %d, want %d",
 			len(actual), 1)
 	}
-	if !actual[0].Equals(testdb.Posts[0]) {
-		t.Errorf("Post didn't match:\n%v\n%v", actual[0], testdb.Posts[0])
+	for _, post := range testdb.Posts {
+		if post.ID == actual[0].ID {
+			if !actual[0].Equals(post) {
+				t.Errorf("Post didn't match: \n%v\n%v", actual[0], post)
+			}
+			return
+		}
 	}
 }
 
@@ -75,9 +90,19 @@ func TestListUserid(t *testing.T) {
 		t.Errorf("Response length didn't match: got %d, want %d",
 			len(actual), 2)
 	}
-	for i, post := range actual {
-		if !post.Equals(testdb.Posts[i]) {
-			t.Errorf("Post didn't match: \n%v\n%v", post, testdb.Posts[i])
+	var found bool
+	for _, post := range actual {
+		found = false
+		for _, p := range testdb.Posts {
+			if p.ID == post.ID {
+				found = true
+				if !post.Equals(p) {
+					t.Errorf("Post didn't match: \n%v\n%v", post, p)
+				}
+			}
+		}
+		if found == false {
+			t.Fatalf("could not find post id %d in result", post.ID)
 		}
 	}
 }
@@ -96,7 +121,12 @@ func TestListLimitUserid(t *testing.T) {
 		t.Errorf("Response length didn't match: got %d, want %d",
 			len(actual), 1)
 	}
-	if !actual[0].Equals(testdb.Posts[0]) {
-		t.Errorf("Post didn't match: \n%v\n%v", actual[0], testdb.Posts[0])
+	for _, post := range testdb.Posts {
+		if post.ID == actual[0].ID {
+			if !actual[0].Equals(post) {
+				t.Errorf("Post didn't match: \n%v\n%v", actual[0], post)
+			}
+			return
+		}
 	}
 }

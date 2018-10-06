@@ -46,7 +46,7 @@ func (u User) Equals(o User) bool {
 
 // Post represents a post data
 type Post struct {
-	ID      int       `json:"-"`
+	ID      int       `json:"id"`
 	Title   string    `json:"title"`
 	Updated time.Time `json:"updated"`
 	Written time.Time `json:"written"`
