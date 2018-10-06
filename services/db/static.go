@@ -9,15 +9,15 @@ import (
 // User represents user data
 type User struct {
 	ID       int       `json:"-"`
-	Username string    `json:"username"`
-	Avatar   string    `json:"avatar"`
-	Name     string    `json:"name"`
-	URL      string    `json:"url"`
+	Username string    `json:"username,omitempty"`
+	Avatar   string    `json:"avatar,omitempty"`
+	Name     string    `json:"name,omitempty"`
+	URL      string    `json:"url,omitempty"`
 	Service  string    `json:"-"`
-	Email    string    `json:"email"`
-	Location string    `json:"location"`
-	Bio      string    `json:"bio"`
-	Updated  time.Time `json:"updated"`
+	Email    string    `json:"email,omitempty"`
+	Location string    `json:"location,omitempty"`
+	Bio      string    `json:"bio,omitempty"`
+	Updated  time.Time `json:"updated,omitempty"`
 }
 
 // Equals check if the non-zero fields in u are the same in o. This means that
