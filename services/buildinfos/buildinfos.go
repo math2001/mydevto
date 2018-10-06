@@ -27,7 +27,7 @@ var Testing bool
 func parseversion(v string) (major, minor, patch int, testing bool) {
 	// remove the leading 'v'
 	str := V[1:]
-	testing = strings.HasSuffix(str, "-test")
+	testing = strings.HasSuffix(str, "-testing")
 
 	all := strings.Split(str, "-")
 	version := all[0]
