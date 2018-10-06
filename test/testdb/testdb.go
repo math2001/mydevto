@@ -32,6 +32,7 @@ var Users = []db.User{
 // Posts are hte post populating the test database
 var Posts = []db.Post{
 	{
+		ID:      1,
 		Title:   "First",
 		Content: "The first post",
 		Updated: time.Unix(0, 0),
@@ -39,6 +40,7 @@ var Posts = []db.Post{
 		User:    Users[0],
 	},
 	{
+		ID:      2,
 		Title:   "Second",
 		Content: "The second post",
 		Updated: time.Unix(10, 0),
@@ -46,6 +48,7 @@ var Posts = []db.Post{
 		User:    Users[0],
 	},
 	{
+		ID:      3,
 		Title:   "Third",
 		Content: "The third post",
 		Updated: time.Unix(20, 0),

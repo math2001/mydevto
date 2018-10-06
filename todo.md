@@ -1,4 +1,5 @@
 - [ ] fix logs (there all going in there sub directory)
+- [ ] move server creation to eponymous test file
 - [ ] allow to change user during tests
 - [ ] fix uli during testing
 - [x] make a sql builder (just for fun)

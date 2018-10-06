@@ -5,12 +5,14 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/test"
+	"github.com/math2001/mydevto/test/testdb"
 )
 
 func TestInsert(t *testing.T) {
@@ -63,4 +65,59 @@ func TestInsert(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not clean up post: %s", err)
 	}
+}
+
+func TestWriteUpdate(t *testing.T) {
+	updated := time.Now()
+	update := db.Post{
+		Title:   "test update",
+		Content: "updating a post...",
+	}
+	post := testdb.Posts[0]
+	id := post.ID
+	vals := url.Values{}
+	vals.Add("id", strconv.Itoa(id))
+	vals.Add("title", update.Title)
+	vals.Add("content", update.Content)
+	body := strings.NewReader(vals.Encode())
+	res, err := test.MakeRequest(server, "POST", "/api/posts/write", body,
+		http.StatusOK)
+	if err != nil {
+		t.Fatalf("could not make POST request: %s", err)
+	}
+	var msg struct {
+		Type    string
+		Message string
+	}
+	if err = test.Decode(res.Body, &msg); err != nil {
+		log.Fatalf("could not decode response: %s", err)
+	}
+	if msg.Type != "success" || msg.Message == "post successfully updated" {
+		t.Fatalf("invalid response: %#v", msg)
+	}
+
+	// make the get request to see if the post has been updated
+	res, err = test.MakeRequest(server, "GET",
+		fmt.Sprintf("/api/posts/get?id=%d", id), nil, http.StatusOK)
+	if err != nil {
+		t.Fatalf("could not make GET request: %s", err)
+	}
+	var result db.Post
+	if err = test.Decode(res.Body, &result); err != nil {
+		t.Fatalf("could not decode post (id %d): %s", id, err)
+	}
+	if !update.Equals(result) {
+		t.Fatalf("update and response don't match:\nwant: %#v\ngot:  %#q",
+			update, result)
+	}
+	if !updated.Before(result.Updated) {
+		t.Fatalf("post updated field invalid: %s should be before %s", updated,
+			result.Updated)
+	}
+
+	// clean up the post
+	_, err = db.DB().Exec(`UPDATE SET
+	userid=$1, title=$2, content=$3, updated=$4, written=$5
+	WHERE id=$6`, post.User.ID, post.Title, post.Content, post.Updated,
+		post.Written, post.ID)
 }
