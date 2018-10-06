@@ -51,6 +51,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	}
 	user.ID = id
 	jot := &db.JWTToken{
+		JWT:  &jwt.JWT{},
 		User: &user,
 	}
 	jot.SetAlgorithm(jwtsigner)
