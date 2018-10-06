@@ -38,6 +38,7 @@ func Current(r *http.Request) *db.User {
 	uli.Printf(r, "getting user information from cookie...")
 	cookie, err := r.Cookie(api.JWT)
 	if err == http.ErrNoCookie {
+		uli.Printf(r, "cookie not found.")
 		return nil
 	} else if err != nil {
 		uli.Printf(r, "could not get cookie for unexpected reason: %s", err)

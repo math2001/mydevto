@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gbrlsnchs/jwt"
 	"github.com/math2001/mydevto/api"
@@ -68,11 +69,12 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		api.InternalError(w, r)
 		return
 	}
-	r.AddCookie(&http.Cookie{
+	http.SetCookie(w, &http.Cookie{
 		Name:     api.JWT,
 		Value:    string(token),
 		Path:     "/",
 		HttpOnly: true,
+		Expires:  time.Now().Add(30 * 24 * time.Hour), // a month
 	})
 	fmt.Fprintf(w, "<script>window.close()</script>")
 }
