@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -120,4 +121,34 @@ func TestWriteUpdate(t *testing.T) {
 	userid=$1, title=$2, content=$3, updated=$4, written=$5
 	WHERE id=$6`, post.User.ID, post.Title, post.Content, post.Updated,
 		post.Written, post.ID)
+}
+
+func TestWriteErrors(t *testing.T) {
+	var params = []url.Values{
+		{},
+		{"title": {"valid"}, "conte": {"no content"}},
+		{"title": {"valid"}, "content": {"no content"}, "id": {"asd"}},
+	}
+	for _, args := range params {
+		args := args
+		t.Run(args.Encode(), func(t *testing.T) {
+			body := strings.NewReader(args.Encode())
+			res, err := test.MakeRequest(server, "POST", "/api/posts/write", body,
+				http.StatusBadRequest)
+			if err != nil {
+				t.Fatalf("could not make request for args %q: %s", args.Encode(), err)
+			}
+			var text map[string]string
+			if err = test.Decode(res.Body, &text); err != nil {
+				t.Fatalf("could not decode response: %s", err)
+			}
+			if !reflect.DeepEqual(text, map[string]string{
+				"type":    "error",
+				"message": "Invalid request form data",
+			}) {
+				t.Fatalf("expected invalid data message, got: %v", text)
+			}
+		})
+	}
+
 }

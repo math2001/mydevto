@@ -56,6 +56,7 @@ func write(w http.ResponseWriter, r *http.Request) {
 		uli.Printf(r, "Title length too long: %q (max is %d)", title,
 			maxTitleLength)
 		invaliddata(w, r)
+		return
 	}
 	content := r.PostForm.Get("content")
 	if content == "" {
