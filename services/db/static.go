@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/fatih/structs"
+	"github.com/gbrlsnchs/jwt"
 )
 
 // User represents user data
@@ -18,6 +19,12 @@ type User struct {
 	Location string    `json:"location,omitempty"`
 	Bio      string    `json:"bio,omitempty"`
 	Updated  time.Time `json:"updated,omitempty"`
+}
+
+// JWTToken stores the user information in a web token
+type JWTToken struct {
+	*jwt.JWT
+	*User
 }
 
 // Equals check if the non-zero fields in u are the same in o. This means that

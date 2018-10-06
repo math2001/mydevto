@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gbrlsnchs/jwt"
 	"github.com/math2001/mydevto/api"
 	"github.com/math2001/mydevto/services/db"
-	"github.com/math2001/mydevto/services/sess"
 	"github.com/math2001/mydevto/services/uli"
 	"github.com/pkg/errors"
 )
@@ -31,41 +31,48 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		api.InternalError(w, r)
 		return
 	}
-	token, err := getToken(sessioncode)
+	servicetoken, err := getToken(sessioncode)
 	if err != nil {
 		uli.Printf(r, "Errored getting token: %s", err)
 		api.InternalError(w, r)
 		return
 	}
-	user, err := retrieveUserInformation(token, api.ServiceGithub)
+	user, err := retrieveUserInformation(servicetoken, api.ServiceGithub)
 	if err != nil {
 		uli.Printf(r, "Errored retrieving user information from token: %s", err)
 		api.InternalError(w, r)
 		return
 	}
-	id, err := saveUserInformation(token, api.ServiceGithub, user)
+	id, err := saveUserInformation(servicetoken, api.ServiceGithub, user)
 	if err != nil {
 		uli.Printf(r, "Errored saving user information to database: %s", err)
 		api.InternalError(w, r)
 		return
 	}
-	session, err := sess.Store().Get(r, api.SessionAuth)
+	user.ID = id
+	jot := &db.JWTToken{
+		User: &user,
+	}
+	jot.SetAlgorithm(jwtsigner)
+	jot.SetKeyID("kid")
+	payload, err := jwt.Marshal(jot)
 	if err != nil {
-		uli.Printf(r, "Errored getting authentication session @ usersAuth: %s", err)
+		uli.Printf(r, "could not marshal JSON token: %s", err)
 		api.InternalError(w, r)
 		return
 	}
-	session.Values["id"] = id
-
-	session.Values["username"] = user.Username
-	session.Values["avatar"] = user.Avatar
-	session.Values["name"] = user.Name
-	session.Values["bio"] = user.Bio
-	session.Values["url"] = user.URL
-	session.Values["email"] = user.Email
-	session.Values["location"] = user.Location
-
-	session.Save(r, w)
+	token, err := jwtsigner.Sign(payload)
+	if err != nil {
+		uli.Printf(r, "could not sign payload: %s", err)
+		api.InternalError(w, r)
+		return
+	}
+	r.AddCookie(&http.Cookie{
+		Name:     api.JWT,
+		Value:    string(token),
+		Path:     "/",
+		HttpOnly: true,
+	})
 	fmt.Fprintf(w, "<script>window.close()</script>")
 }
 

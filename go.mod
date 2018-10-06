@@ -1,6 +1,7 @@
 module github.com/math2001/mydevto
 
 require (
+	github.com/fatih/structs v1.0.0
 	github.com/gorilla/mux v1.6.2
 	github.com/gorilla/sessions v1.1.2
 	github.com/lib/pq v1.0.0

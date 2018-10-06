@@ -11,6 +11,8 @@ const (
 	// ServiceGithub is the expected name that will be given as the oauth
 	// callback
 	ServiceGithub = "github"
+	// JWT is the cookie name to store the token in
+	JWT = "jwt"
 )
 
 // HTTPClient is the only http client that is allowed to be used by any part of
