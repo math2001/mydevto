@@ -60,6 +60,9 @@ func MakeRequest(server *httptest.Server, method, target string, body io.Reader,
 	statuscode int) (*http.Response, error) {
 
 	req, err := http.NewRequest(method, server.URL+target, body)
+	if method == "POST" {
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	}
 	req.AddCookie(&http.Cookie{
 		Name:  api.JWT,
 		Value: token,

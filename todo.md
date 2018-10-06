@@ -1,7 +1,8 @@
 - [ ] fix logs (there all going in there sub directory)
-- [ ] make custom router
-- [ ] ditch gorilla/sessions. Make my own or look for a decent library
-- [ ] make a sql builder (just for fun)
+- [ ] allow to change user during tests
+- [ ] fix uli during testing
+- [x] make a sql builder (just for fun)
+- [x] ditch gorilla/sessions. Make my own or look for a decent library
 - [x] investigate http.NewRequest with the .RequestURI thing
 - [x] move resp/version into services?
 - [x] rename version package to build info
