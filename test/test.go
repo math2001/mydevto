@@ -6,11 +6,44 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 
+	"github.com/gbrlsnchs/jwt"
+	"github.com/math2001/mydevto/api"
+	"github.com/math2001/mydevto/services/db"
+	"github.com/math2001/mydevto/test/testdb"
 	"github.com/pkg/errors"
 )
+
+// cheating the system: we pretend the user is already logged in, and this is
+// the token he has stored as cookie
+var token string
+
+func init() {
+	key := os.Getenv("JWTSECRET")
+	if key == "" {
+		log.Fatal("$JWTSECRET needs to be specified")
+	}
+	hs256 := jwt.NewHS256(key)
+	jot := &db.JWTToken{
+		JWT:  &jwt.JWT{},
+		User: &testdb.Users[0], // we pretend to be the user number 1
+	}
+	jot.SetAlgorithm(hs256)
+	jot.SetKeyID("kid")
+	payload, err := jwt.Marshal(jot)
+	if err != nil {
+		log.Fatalf("could not marshal jot: %s", err)
+	}
+	b, err := hs256.Sign(payload)
+	if err != nil {
+		log.Fatalf("could not sign payload: %s", err)
+	}
+	token = string(b)
+}
 
 // returns the body of the response, or the error, as a string
 // It is used to present errors when test fail
@@ -27,6 +60,10 @@ func MakeRequest(server *httptest.Server, method, target string, body io.Reader,
 	statuscode int) (*http.Response, error) {
 
 	req, err := http.NewRequest(method, server.URL+target, body)
+	req.AddCookie(&http.Cookie{
+		Name:  api.JWT,
+		Value: token,
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "could not make request")
 	}
