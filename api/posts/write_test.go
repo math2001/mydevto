@@ -57,4 +57,10 @@ func TestInsert(t *testing.T) {
 		t.Fatalf("post written field invalid: %s should be before %s", insert,
 			result.Written)
 	}
+
+	// clean up the post
+	_, err = db.DB().Exec("DELETE FROM posts WHERE id=$1", msg.ID)
+	if err != nil {
+		t.Fatalf("could not clean up post: %s", err)
+	}
 }
