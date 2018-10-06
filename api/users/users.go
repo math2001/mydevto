@@ -55,7 +55,10 @@ func Current(r *http.Request) *db.User {
 		uli.Printf(r, "could not verify payload signature from jwt: %s", err)
 		return nil
 	}
-	var jot db.JWTToken
+	var jot = db.JWTToken{
+		User: &db.User{},
+		JWT:  &jwt.JWT{},
+	}
 	if err = jwt.Unmarshal(payload, &jot); err != nil {
 		uli.Printf(r, "could not unmarshal payload from jwt: %s", err)
 		return nil
