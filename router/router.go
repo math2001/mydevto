@@ -17,6 +17,7 @@ import (
 
 // This is the homepage, the only page the user is going to load directly
 // quick and dirty. This is going to be managed by the views in the future.
+// It breaks testing though. I enable it when I need it (to create JWT).
 func index() http.HandlerFunc {
 	githubid := os.Getenv("GITHUBID")
 	if githubid == "" {
@@ -43,7 +44,7 @@ func Router() *mux.Router {
 	router.Use(uli.Middleware)
 	router.StrictSlash(true)
 
-	router.HandleFunc("/", index())
+	// router.HandleFunc("/", index())
 	router.PathPrefix("/static").Handler(
 		http.StripPrefix("/static", http.FileServer(http.Dir("web/static"))))
 	manageAPI(router.PathPrefix("/api").Subrouter())
