@@ -75,7 +75,7 @@ func write(w http.ResponseWriter, r *http.Request) {
 			RETURNING (id)
 		`, userid, title, content).Scan(&newid)
 		if err != nil {
-			uli.Printf(r, "could not insert post new post: %s", err)
+			uli.Printf(r, "could not insert new post: %s", err)
 			// I sure hope no one will have to parse through that, but I'm sure
 			// it'll be very helpful when this error occurs
 			uli.Printf(r, "userid: %d title: %q content: %q", userid, title,

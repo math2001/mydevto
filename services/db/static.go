@@ -9,12 +9,12 @@ import (
 
 // User represents user data
 type User struct {
-	ID       int       `json:"-"`
+	ID       int       `json:"id"`
 	Username string    `json:"username,omitempty"`
 	Avatar   string    `json:"avatar,omitempty"`
 	Name     string    `json:"name,omitempty"`
 	URL      string    `json:"url,omitempty"`
-	Service  string    `json:"-"`
+	Service  string    `json:"service,omitempty"`
 	Email    string    `json:"email,omitempty"`
 	Location string    `json:"location,omitempty"`
 	Bio      string    `json:"bio,omitempty"`

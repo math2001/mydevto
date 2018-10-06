@@ -39,6 +39,8 @@ func TestInsert(t *testing.T) {
 	if msg.Type != "success" || msg.Message != "post successfully inserted" {
 		t.Fatalf("invalid response: %#v", msg)
 	}
+	// Now, we make a get request asking for the post, and then checking if it
+	// matches
 	res, err = test.MakeRequest(server, "GET",
 		fmt.Sprintf("/api/posts/get?id=%d", msg.ID), nil, http.StatusOK)
 	if err != nil {
@@ -48,7 +50,7 @@ func TestInsert(t *testing.T) {
 	if err = test.Decode(res.Body, &result); err != nil {
 		log.Fatalf("could not decode post (id %d): %s", msg.ID, err)
 	}
-	if !result.Equals(post) {
+	if !post.Equals(result) {
 		t.Fatalf("post does not match\nwant: %#v\ngot:  %#v", post, result)
 	}
 	if !insert.Before(result.Written) {
