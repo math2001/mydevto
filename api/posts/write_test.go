@@ -1,6 +1,7 @@
 package posts_test
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -64,7 +65,8 @@ func TestInsert(t *testing.T) {
 	}
 
 	// clean up the post
-	_, err = db.DB().Exec("DELETE FROM posts WHERE id=$1", msg.ID)
+	_, err = db.ExecContext(context.Background(),
+		"DELETE FROM posts WHERE id=$1", msg.ID)
 	if err != nil {
 		t.Fatalf("could not clean up post: %s", err)
 	}
@@ -119,7 +121,7 @@ func TestWriteUpdate(t *testing.T) {
 	}
 
 	// clean up the post
-	_, err = db.DB().Exec(`UPDATE posts SET
+	_, err = db.ExecContext(context.Background(), `UPDATE posts SET
 	userid=$1, title=$2, content=$3, updated=$4, written=$5
 	WHERE id=$6`, post.User.ID, post.Title, post.Content, post.Updated,
 		post.Written, id)

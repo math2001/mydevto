@@ -1,6 +1,7 @@
 package testdb
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -59,8 +60,9 @@ var Posts = []db.Post{
 
 // Populate the test database
 func Populate() {
+	ctx := context.Background()
 	for _, u := range Users {
-		_, err := db.DB().Exec(`INSERT INTO users (id, username, name, bio, email,
+		_, err := db.ExecContext(ctx, `INSERT INTO users (id, username, name, bio, email,
 		service, updated) VALUES ($1, $2, $3, $4, $5, $6, $7)`, u.ID, u.Username, u.Name, u.Bio,
 			u.Email, u.Service, u.Updated)
 		if err != nil {
@@ -68,7 +70,7 @@ func Populate() {
 		}
 	}
 	for _, p := range Posts {
-		_, err := db.DB().Exec(`INSERT INTO posts (title, content, updated, written,
+		_, err := db.ExecContext(ctx, `INSERT INTO posts (title, content, updated, written,
 		userid) VALUES ($1, $2, $3, $4, $5)`, p.Title, p.Content, p.Written,
 			p.Updated, p.User.ID)
 		if err != nil {

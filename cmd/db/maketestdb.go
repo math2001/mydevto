@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/math2001/mydevto/services/db"
@@ -9,9 +10,9 @@ import (
 
 func main() {
 	log.Println("Connecting to the database...")
-	db := db.DB()
 	log.Println("Creating the schema for the database...")
-	_, err := db.Exec(`
+	ctx := context.Background()
+	_, err := db.ExecContext(ctx, `
 	CREATE TABLE users (
 		id        SERIAL,
 		token     VARCHAR(255) NOT NULL DEFAULT '',
