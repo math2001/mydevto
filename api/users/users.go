@@ -25,7 +25,7 @@ func Manage(r *mux.Router) {
 	}
 	jwtsigner = jwt.NewHS256(jwtsecret)
 
-	r.Handle("/", api.ListRoutes{Router: r}).Methods("GET")
+	r.Handle("/", api.ListRoutes(r)).Methods("GET")
 	// in there documentation, github say they send a POST request, but they
 	// actually send a GET... :(
 	r.HandleFunc("/auth", auth).Methods("GET")

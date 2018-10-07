@@ -1,7 +1,4 @@
-- [ ] move listroutes.go to api.go
-
-- [ ] fix logs (there all going in there sub directory)
-- [ ] fix logs order
+- [ ] fix logs order (names) #maybe
 - [ ] do separate test suite to only test from user perspective
 - [ ] move server creation to eponymous test file
 - [ ] allow to change user during tests
@@ -11,3 +8,5 @@
 - [x] investigate http.NewRequest with the .RequestURI thing
 - [x] move resp/version into services?
 - [x] rename version package to build info
+- [x] move listroutes.go to api.go
+- [x] fix logs (there all going in there sub directory)

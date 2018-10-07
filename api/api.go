@@ -2,7 +2,11 @@ package api
 
 import (
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/math2001/mydevto/services/uli"
 )
 
 const (
@@ -20,4 +24,38 @@ const (
 // isn't any on the default one)
 var HTTPClient = http.Client{
 	Timeout: 20 * time.Second,
+}
+
+// ListRoutes is a little utility that lists every routes that router (or
+// subrouter) handles. This is useful for devlopment
+func ListRoutes(router *mux.Router) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		var routes = make(map[string]string)
+		err := router.Walk(func(route *mux.Route, _ *mux.Router, _ []*mux.Route) error {
+			t, err := route.GetPathTemplate()
+			if err != nil {
+				return err
+			}
+			m, err := route.GetMethods()
+			// this check if absolutely gross, but mux doesn't export their error,
+			// so I don't really have a choice (Tuesday 25 September 2018)
+			if err != nil && err.Error() != "mux: route doesn't have methods" {
+				return err
+			}
+			if len(m) == 0 {
+				routes[t] = "*"
+			} else {
+				routes[t] = strings.Join(m, ", ")
+			}
+			return nil
+		})
+		if err != nil {
+			uli.Printf(ctx, "Errored walking routes: %s", err)
+			InternalError(w, r)
+			return
+		}
+		Encode(w, r, routes, http.StatusOK)
+	}
 }

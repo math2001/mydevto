@@ -52,7 +52,7 @@ func Router() *mux.Router {
 }
 
 func manageAPI(r *mux.Router) {
-	r.Handle("/", api.ListRoutes{Router: r}).Methods("GET")
+	r.Handle("/", api.ListRoutes(r)).Methods("GET")
 	posts.Manage(r.PathPrefix("/posts/").Subrouter())
 	users.Manage(r.PathPrefix("/users/").Subrouter())
 }
