@@ -36,7 +36,7 @@ func Success(w http.ResponseWriter, r *http.Request, format string, a ...interfa
 // RequestLogin is similar to InternalErro. It just writes that the user should
 // login before trying to access this part of the website
 func RequestLogin(w http.ResponseWriter, r *http.Request) {
-	uli.Printf(r, "%s tried to claim access", r.RemoteAddr)
+	uli.Printf(r.Context(), "%s tried to claim access", r.RemoteAddr)
 	Error(w, r, http.StatusForbidden, "please log in")
 }
 

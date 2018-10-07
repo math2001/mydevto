@@ -12,22 +12,23 @@ import (
 
 // get gets a post by id
 func get(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	idstring := r.URL.Query().Get("id")
 	if idstring == "" {
-		uli.Printf(r, "Given an empty idstring")
+		uli.Printf(ctx, "Given an empty idstring")
 		api.Error(w, r, http.StatusBadRequest, "Invalid id. Empty strings not allowed")
 		return
 	}
 	id, err := strconv.Atoi(idstring)
 	if err != nil {
-		uli.Printf(r, "Couldn't convert id %q to integer: %s", idstring, err)
+		uli.Printf(ctx, "Couldn't convert id %q to integer: %s", idstring, err)
 		api.Error(w, r, http.StatusBadRequest,
 			"Couldn't convert id %q to integer", idstring)
 		return
 	}
 	p := db.Post{}
 	u := &p.User
-	err = db.DB().QueryRow(`
+	err = db.QueryRowContext(ctx, `
 	SELECT p.title, p.content, p.written, p.updated,
 		   u.username, u.bio, u.url, u.avatar, u.name
 	FROM posts AS p
@@ -38,10 +39,10 @@ func get(w http.ResponseWriter, r *http.Request) {
 		&u.Bio, &u.URL, &u.Avatar, &u.Name)
 
 	if err == sql.ErrNoRows {
-		uli.Printf(r, "No post found with id %d", id)
+		uli.Printf(ctx, "No post found with id %d", id)
 		api.Error(w, r, http.StatusBadRequest, "No post found with id %d", id)
 	} else if err != nil {
-		uli.Printf(r, "Errored querying post from id %d: %s", id, err)
+		uli.Printf(ctx, "Errored querying post from id %d: %s", id, err)
 		api.InternalError(w, r)
 	} else {
 		api.Encode(w, r, p, http.StatusOK)

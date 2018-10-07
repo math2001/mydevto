@@ -1,6 +1,7 @@
 package users
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -19,34 +20,35 @@ import (
 // auth is called by the service with 'service' as the name in the
 // parameters, and finishes the auth flow. It's the 'callback'
 func auth(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	query := r.URL.Query()
 	service := query.Get("service")
 	if service != "github" {
-		uli.Printf(r, "Invalid service %q trying to authenticate @ usersAuth", service)
+		uli.Printf(ctx, "Invalid service %q trying to authenticate @ usersAuth", service)
 		api.Error(w, r, http.StatusBadRequest, "Invalid service")
 		return
 	}
 	sessioncode := query.Get("code")
 	if sessioncode == "" {
-		uli.Printf(r, "No session code in URL parameter @ usersAuth#%q", service)
+		uli.Printf(ctx, "No session code in URL parameter @ usersAuth#%q", service)
 		api.InternalError(w, r)
 		return
 	}
 	servicetoken, err := getToken(sessioncode)
 	if err != nil {
-		uli.Printf(r, "Errored getting token: %s", err)
+		uli.Printf(ctx, "Errored getting token: %s", err)
 		api.InternalError(w, r)
 		return
 	}
 	user, err := retrieveUserInformation(servicetoken, api.ServiceGithub)
 	if err != nil {
-		uli.Printf(r, "Errored retrieving user information from token: %s", err)
+		uli.Printf(ctx, "Errored retrieving user information from token: %s", err)
 		api.InternalError(w, r)
 		return
 	}
-	id, err := saveUserInformation(servicetoken, api.ServiceGithub, user)
+	id, err := saveUserInformation(ctx, servicetoken, api.ServiceGithub, user)
 	if err != nil {
-		uli.Printf(r, "Errored saving user information to database: %s", err)
+		uli.Printf(ctx, "Errored saving user information to database: %s", err)
 		api.InternalError(w, r)
 		return
 	}
@@ -59,13 +61,13 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	jot.SetKeyID("kid")
 	payload, err := jwt.Marshal(jot)
 	if err != nil {
-		uli.Printf(r, "could not marshal JSON token: %s", err)
+		uli.Printf(ctx, "could not marshal JSON token: %s", err)
 		api.InternalError(w, r)
 		return
 	}
 	token, err := jwtsigner.Sign(payload)
 	if err != nil {
-		uli.Printf(r, "could not sign payload: %s", err)
+		uli.Printf(ctx, "could not sign payload: %s", err)
 		api.InternalError(w, r)
 		return
 	}
@@ -163,7 +165,7 @@ func retrieveUserInformation(token string, service string) (db.User, error) {
 
 // Saves the user information into the database, returning the ID of that user,
 // and an error, if any.
-func saveUserInformation(token string, service string, user db.User) (int, error) {
+func saveUserInformation(ctx context.Context, token string, service string, user db.User) (int, error) {
 	sql := `
 	INSERT INTO users (token, username, avatar, name, bio, url, email, location, service)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -172,7 +174,7 @@ func saveUserInformation(token string, service string, user db.User) (int, error
 	RETURNING (id)
 	`
 	var id int
-	err := db.DB().QueryRow(sql, token, user.Username, user.Avatar, user.Name,
+	err := db.QueryRowContext(ctx, sql, token, user.Username, user.Avatar, user.Name,
 		user.Bio, user.URL, user.Email, user.Location, service).Scan(&id)
 	return id, errors.Wrapf(err, "errored executing request")
 }

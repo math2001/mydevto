@@ -1,6 +1,7 @@
 package users
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -33,26 +34,26 @@ func Manage(r *mux.Router) {
 
 // Current returns the current user's information from the sessions. It returns
 // nil if he isn't connected
-func Current(r *http.Request) *db.User {
+func Current(ctx context.Context, r *http.Request) *db.User {
 	// session, err := sess.Store().Get(r, api.SessionAuth)
-	uli.Printf(r, "getting user information from cookie...")
+	uli.Printf(ctx, "getting user information from cookie...")
 	cookie, err := r.Cookie(api.JWT)
 	if err == http.ErrNoCookie {
-		uli.Printf(r, "cookie not found.")
+		uli.Printf(ctx, "cookie not found.")
 		return nil
 	} else if err != nil {
-		uli.Printf(r, "could not get cookie for unexpected reason: %s", err)
+		uli.Printf(ctx, "could not get cookie for unexpected reason: %s", err)
 		return nil
 	}
-	uli.Printf(r, "parsing information from %q", cookie.Value)
+	uli.Printf(ctx, "parsing information from %q", cookie.Value)
 	payload, sig, err := jwt.Parse(cookie.Value)
 	if err != nil {
-		uli.Printf(r, "could not parse payload from jwt: %s", err)
+		uli.Printf(ctx, "could not parse payload from jwt: %s", err)
 		return nil
 	}
 	if err = jwtsigner.Verify(payload, sig); err != nil {
-		uli.Security(r) // someone's probably messing aroud with the JWT
-		uli.Printf(r, "could not verify payload signature from jwt: %s", err)
+		uli.Security(ctx) // someone's probably messing aroud with the JWT
+		uli.Printf(ctx, "could not verify payload signature from jwt: %s", err)
 		return nil
 	}
 	var jot = db.JWTToken{
@@ -60,7 +61,7 @@ func Current(r *http.Request) *db.User {
 		JWT:  &jwt.JWT{},
 	}
 	if err = jwt.Unmarshal(payload, &jot); err != nil {
-		uli.Printf(r, "could not unmarshal payload from jwt: %s", err)
+		uli.Printf(ctx, "could not unmarshal payload from jwt: %s", err)
 		return nil
 	}
 	u := &db.User{}

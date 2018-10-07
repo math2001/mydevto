@@ -19,14 +19,15 @@ func invaliddata(w http.ResponseWriter, r *http.Request) {
 
 // write creates or updates a posts, depending on whether id is given
 func write(w http.ResponseWriter, r *http.Request) {
-	user := users.Current(r)
+	ctx := r.Context()
+	user := users.Current(ctx, r)
 	if user == nil {
 		api.RequestLogin(w, r)
 		return
 	}
 	userid := user.ID
 	if err := r.ParseForm(); err != nil {
-		uli.Printf(r, "Could not parse form data: %s", err)
+		uli.Printf(ctx, "Could not parse form data: %s", err)
 		api.Error(w, r, http.StatusBadRequest,
 			"Could not parse form data: %s", err)
 		return
@@ -42,32 +43,32 @@ func write(w http.ResponseWriter, r *http.Request) {
 	// it means we update a post, otherwise, we just insert a new one
 	idstring := r.PostForm.Get("id")
 	if id, err = strconv.Atoi(idstring); idstring != "" && err != nil {
-		uli.Printf(r, "Invalid id field: %q", idstring)
+		uli.Printf(ctx, "Invalid id field: %q", idstring)
 		invaliddata(w, r)
 		return
 	}
 	title := r.PostForm.Get("title")
 	if title == "" {
-		uli.Printf(r, "no title given")
+		uli.Printf(ctx, "no title given")
 		invaliddata(w, r)
 		return
 	}
 	if len(title) > maxTitleLength {
-		uli.Printf(r, "Title length too long: %q (max is %d)", title,
+		uli.Printf(ctx, "Title length too long: %q (max is %d)", title,
 			maxTitleLength)
 		invaliddata(w, r)
 		return
 	}
 	content := r.PostForm.Get("content")
 	if content == "" {
-		uli.Printf(r, "no content given")
+		uli.Printf(ctx, "no content given")
 		invaliddata(w, r)
 		return
 	}
 
 	var newid int
 	if id == 0 {
-		err = db.DB().QueryRow(`
+		err = db.QueryRowContext(ctx, `
 			INSERT INTO posts (
 				userid,
 				title,
@@ -76,10 +77,10 @@ func write(w http.ResponseWriter, r *http.Request) {
 			RETURNING (id)
 		`, userid, title, content).Scan(&newid)
 		if err != nil {
-			uli.Printf(r, "could not insert new post: %s", err)
+			uli.Printf(ctx, "could not insert new post: %s", err)
 			// I sure hope no one will have to parse through that, but I'm sure
 			// it'll be very helpful when this error occurs
-			uli.Printf(r, "userid: %d title: %q content: %q", userid, title,
+			uli.Printf(ctx, "userid: %d title: %q content: %q", userid, title,
 				content)
 			api.InternalError(w, r)
 			return
@@ -91,18 +92,18 @@ func write(w http.ResponseWriter, r *http.Request) {
 		}, http.StatusOK)
 		return
 	}
-	err = db.DB().QueryRow(`
+	err = db.QueryRowContext(ctx, `
 		UPDATE posts SET title=$1, content=$2, updated=NOW()
 		WHERE id=$3 AND userid=$4
 		RETURNING (id)
 	`, title, content, id, userid).Scan(&newid)
 	if err == sql.ErrNoRows {
-		uli.Security(r)
-		uli.Printf(r, "invalid combination postid (%d) and userid (%d)", id, userid)
+		uli.Security(ctx)
+		uli.Printf(ctx, "invalid combination postid (%d) and userid (%d)", id, userid)
 		api.InternalError(w, r)
 		return
 	} else if err != nil {
-		uli.Printf(r, "could not update post: %s", err)
+		uli.Printf(ctx, "could not update post: %s", err)
 		api.InternalError(w, r)
 		return
 	}
@@ -110,8 +111,8 @@ func write(w http.ResponseWriter, r *http.Request) {
 	// not sure about the behaviour of SERIAL in postgres (04.10.2018), which
 	// is the type of the id field
 	if newid != id {
-		uli.Security(r)
-		uli.Printf(r, "post id (%d) is different from the returned id (%d)",
+		uli.Security(ctx)
+		uli.Printf(ctx, "post id (%d) is different from the returned id (%d)",
 			id, newid)
 		api.InternalError(w, r)
 		return

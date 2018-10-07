@@ -3,6 +3,7 @@
 package uli
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -14,7 +15,12 @@ import (
 	"github.com/math2001/mydevto/services/buildinfos"
 )
 
-const logsdir = "./logs"
+type key int
+
+const (
+	logsdir    = "./logs"
+	ctxRequest = key(iota)
+)
 
 var logger *log.Logger
 
@@ -62,22 +68,30 @@ func createfile(version string) io.Writer {
 }
 
 // Printf logs the message with the request identification at the beginning.
-func Printf(r *http.Request, format string, a ...interface{}) {
+func Printf(ctx context.Context, format string, a ...interface{}) {
+	r, ok := ctx.Value(ctxRequest).(*http.Request)
+	if !ok {
+		// there is no request in the context
+		logger.Printf(format, a...)
+		return
+	}
 	logger.Printf("%s %s %s", r.RemoteAddr, r.RequestURI, fmt.Sprintf(format, a...))
 }
 
 // Security display a warning header indicating that the next log is could be
 // about a security flaw
-func Security(r *http.Request) {
-	Printf(r, "POTENTIAL SECURITY FLAW")
+func Security(ctx context.Context) {
+	Printf(ctx, "POTENTIAL SECURITY FLAW")
 }
 
 // Middleware is the middleware that mux will use
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, ctxRequest, r)
 		start := time.Now()
-		Printf(r, "Handling")
-		next.ServeHTTP(w, r)
-		Printf(r, "Finished after %.2fs", time.Now().Sub(start).Seconds())
+		Printf(ctx, "Handling")
+		next.ServeHTTP(w, r.WithContext(ctx))
+		Printf(ctx, "Finished after %.2fs", time.Now().Sub(start).Seconds())
 	})
 }

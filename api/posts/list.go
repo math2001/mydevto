@@ -12,6 +12,7 @@ import (
 )
 
 func list(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	q := r.URL.Query()
 	var (
 		limit  = -1
@@ -21,7 +22,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 	if lim := q.Get("limit"); lim != "" {
 		limit, err = strconv.Atoi(lim)
 		if err != nil {
-			uli.Printf(r, "Invalid limit @ postsGet: %s", err)
+			uli.Printf(ctx, "Invalid limit @ postsGet: %s", err)
 			api.Error(w, r, http.StatusBadRequest,
 				"Invalid `limit`. Should be a number")
 			return
@@ -30,7 +31,7 @@ func list(w http.ResponseWriter, r *http.Request) {
 	if ui := q.Get("userid"); ui != "" {
 		userid, err = strconv.Atoi(ui)
 		if err != nil {
-			uli.Printf(r, "Invalid userid @ postsGet: %s", err)
+			uli.Printf(ctx, "Invalid userid @ postsGet: %s", err)
 			api.Error(w, r, http.StatusBadRequest, "Invalid `userid`. Should be a number")
 			return
 		}
@@ -51,15 +52,14 @@ func list(w http.ResponseWriter, r *http.Request) {
 	}
 	sql, args, err := b.Query()
 	if err != nil {
-		uli.Printf(r, "Errored building sql request @ postIndex: %s", err)
+		uli.Printf(ctx, "Errored building sql request @ postIndex: %s", err)
 		api.InternalError(w, r)
 		return
 	}
-	uli.Printf(r, "Querying @ postIndex: %q %v", sql, args)
-	rows, err := db.DB().Query(sql, args...)
+	rows, err := db.QueryContext(ctx, sql, args...)
 	if err != nil {
 		fmt.Println("query good", err)
-		uli.Printf(r, "Errored querying @ postIndex: %s", err)
+		uli.Printf(ctx, "Errored querying @ postIndex: %s", err)
 		api.InternalError(w, r)
 		return
 	}
@@ -70,14 +70,14 @@ func list(w http.ResponseWriter, r *http.Request) {
 		err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.Written, &p.Updated, &u.Name,
 			&u.Username, &u.Avatar, &u.Bio, &u.URL, &u.Email, &u.Location)
 		if err != nil {
-			uli.Printf(r, "Errored scanning rows @ postIndex: %s", err)
+			uli.Printf(ctx, "Errored scanning rows @ postIndex: %s", err)
 			api.InternalError(w, r)
 			return
 		}
 		posts = append(posts, p)
 	}
 	if err := rows.Err(); err != nil {
-		uli.Printf(r, "Errored during iteration @ postIndex: %s", err)
+		uli.Printf(ctx, "Errored during iteration @ postIndex: %s", err)
 		api.InternalError(w, r)
 		return
 	}

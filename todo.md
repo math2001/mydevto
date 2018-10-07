@@ -1,3 +1,5 @@
+- [ ] move listroutes.go to api.go
+
 - [ ] fix logs (there all going in there sub directory)
 - [ ] fix logs order
 - [ ] do separate test suite to only test from user perspective

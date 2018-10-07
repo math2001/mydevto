@@ -1,14 +1,17 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	// initiate the drivers for postgresql
 	_ "github.com/lib/pq"
+	"github.com/math2001/mydevto/services/uli"
 )
 
 var db *sql.DB
@@ -43,7 +46,7 @@ func (cfg Config) valid() bool {
 
 // Init creates a connection to the database with the given configuration
 // It should be called only once
-func Init() {
+func init() {
 	dblogin := os.Getenv("DBLOGIN")
 	if dblogin == "" {
 		log.Fatal("$DBLOGIN must be set")
@@ -75,15 +78,29 @@ func Init() {
 	}
 }
 
-func init() {
-	Init()
+// QueryContext executes a query, logging and timing it
+func QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+	start := time.Now()
+	uli.Printf(ctx, "DB: query %q %v", query, args)
+	defer uli.Printf(ctx, "DB: query %q %v done after %.2f", query, args,
+		time.Now().Sub(start).Seconds())
+	return db.QueryContext(ctx, query, args...)
 }
 
-// DB returns a pointer to the existing connection. Note that it might be nil
-// if Open hasn't been called before hand
-func DB() *sql.DB {
-	if db == nil {
-		log.Printf("Yep, you didn't call db.Init()...")
-	}
-	return db
+// QueryRowContext executes a query, logging and timing it
+func QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
+	start := time.Now()
+	uli.Printf(ctx, "DB: query row %q %v", query, args)
+	defer uli.Printf(ctx, "DB: query row %q %v done after %.2f", query, args,
+		time.Now().Sub(start).Seconds())
+	return db.QueryRowContext(ctx, query, args...)
+}
+
+// ExecContext executes a query, logging and timing it
+func ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+	start := time.Now()
+	uli.Printf(ctx, "DB: exec %q %v", query, args)
+	defer uli.Printf(ctx, "DB: exec %q %v done after %.2f", query, args,
+		time.Now().Sub(start).Seconds())
+	return db.ExecContext(ctx, query, args...)
 }

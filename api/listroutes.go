@@ -15,6 +15,7 @@ type ListRoutes struct {
 }
 
 func (lr ListRoutes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	var routes = make(map[string]string)
 	err := lr.Router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		t, err := route.GetPathTemplate()
@@ -35,7 +36,7 @@ func (lr ListRoutes) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 	if err != nil {
-		uli.Printf(r, "Errored walking routes: %s", err)
+		uli.Printf(ctx, "Errored walking routes: %s", err)
 		InternalError(w, r)
 		return
 	}

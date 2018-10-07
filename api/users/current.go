@@ -8,7 +8,7 @@ import (
 
 // current serves the information about the currently logged in user
 func current(w http.ResponseWriter, r *http.Request) {
-	u := Current(r)
+	u := Current(r.Context(), r)
 	if u == nil {
 		api.RequestLogin(w, r)
 		return
