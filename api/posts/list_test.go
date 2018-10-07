@@ -2,24 +2,12 @@ package posts_test
 
 import (
 	"net/http"
-	"net/http/httptest"
-	"os"
 	"testing"
 
-	"github.com/math2001/mydevto/router"
 	"github.com/math2001/mydevto/services/db"
 	"github.com/math2001/mydevto/test"
 	"github.com/math2001/mydevto/test/testdb"
 )
-
-var server *httptest.Server
-
-func TestMain(t *testing.M) {
-	server = httptest.NewServer(router.Router())
-	code := t.Run()
-	server.Close()
-	os.Exit(code)
-}
 
 func TestListNoFilter(t *testing.T) {
 	rr, err := test.MakeRequest(server, "GET", "/api/posts/list", nil,

@@ -1,8 +1,8 @@
 - [ ] fix logs order (names) #maybe
 - [ ] do separate test suite to only test from user perspective
-- [ ] move server creation to eponymous test file
 - [ ] allow to change user during tests
 - [ ] fix uli during testing
+- [x] move server creation to eponymous test file
 - [x] make a sql builder (just for fun)
 - [x] ditch gorilla/sessions. Make my own or look for a decent library
 - [x] investigate http.NewRequest with the .RequestURI thing
