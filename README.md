@@ -23,6 +23,8 @@ How it works? It's explained a bit below...
 
 ### Reliable
 
+> Right now the tests are a mess. Please don't look at the code :laugh:
+
 Testing. The user doesn't care if all the unit test pass, he just wants the
 *result* to work.
 
